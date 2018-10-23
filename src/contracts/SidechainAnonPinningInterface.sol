@@ -1,6 +1,17 @@
-pragma solidity ^0.4.18;
+/*
+ * Copyright 2018 ConsenSys AG.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+pragma solidity ^0.4.23;
 
-import "./Ownable.sol";
 
 /**
  * Contract to manage multiple sidechains.
@@ -55,7 +66,7 @@ import "./Ownable.sol";
  *
  *
  */
-interface SidechainManagementInterface {
+interface SidechainAnonPinningInterface {
 
     /**
      * Add a sidechain to be managed.
@@ -64,7 +75,7 @@ interface SidechainManagementInterface {
      * @param _votingPeriod The number of blocks by which time a vote must be finalized.
      * @param _votingAlgorithmContract The address of the initial contract to be used for all votes.
      */
-    function addSidechain(bytes32 _sidechainId, uint _votingPeriod, address _votingAlgorithmContract) public;
+    function addSidechain(uint256 _sidechainId, uint64 _votingPeriod, address _votingAlgorithmContract) external;
 
 
     /**
@@ -75,7 +86,7 @@ interface SidechainManagementInterface {
      * @param _index The index into the list of sidechain masked participants.
      * @return Salted hash or the participant's address, or 0x00.
      */
-    function unmask(bytes32 _sidechainId, uint _index, bytes32 _salt) public;
+//    function unmask(bytes32 _sidechainId, uint _index, bytes32 _salt) external;
 
     /**
      * Propose that a certain action be voted on.
@@ -85,7 +96,7 @@ interface SidechainManagementInterface {
      *  to be voted on.
      * @param _action The action to be voted on.
      */
-    function proposeVote(bytes32 _sidechainId, bytes32 _participant, uint _action) public;
+//    function proposeVote(bytes32 _sidechainId, bytes32 _participant, uint _action) external;
 
     /**
      * Vote for a proposal.
@@ -98,7 +109,7 @@ interface SidechainManagementInterface {
      * @param _action The action to be voted on.
      * @param _voteFor True if the transaction sender wishes to vote for the action.
      */
-    function vote(bytes32 _sidechainId, bytes32 _participant, uint _action, bool _voteFor) public;
+//    function vote(bytes32 _sidechainId, bytes32 _participant, uint _action, bool _voteFor) external;
 
     /**
      * Vote for a proposal.
@@ -109,7 +120,7 @@ interface SidechainManagementInterface {
      * @param _participant Either a masked or unmasked participant which the vote pertains to.
      *          If it is an unmasked participant, then the value is an address.
      */
-    function actionVotes(bytes32 _sidechainId, bytes32 _participant) public;
+//    function actionVotes(bytes32 _sidechainId, bytes32 _participant) external;
 
 
 
@@ -125,7 +136,7 @@ interface SidechainManagementInterface {
      * @param _pinKey The pin key calculated as per the equation above.
      * @param _pin Value to be associated with the key.
      */
-    function addPin(bytes32 _pinKey, bytes32 _pin) public;
+//    function addPin(bytes32 _pinKey, bytes32 _pin) external;
 
 
     /**
@@ -140,7 +151,7 @@ interface SidechainManagementInterface {
      * @param _pinKey The pin key calculated as per the equation above.
      * @return The pin at the key.
      */
-    function getPin(bytes32 _pinKey) public view returns (bytes32);
+//    function getPin(bytes32 _pinKey) external view returns (bytes32);
 
     /**
      * Contest a pin. The message sender must be an unmasked member of the sidechain,
@@ -162,12 +173,12 @@ interface SidechainManagementInterface {
      * @param _pinKey The pin key calculated as per the equation above.
      * @param _drbgValue The next value in the DRBG sequence.
      */
-    function contestPin(bytes32 _sidechainId, bytes32 _previousPinKey, bytes32 _pinKey, bytes32 _drbgValue) public;
+//    function contestPin(bytes32 _sidechainId, bytes32 _previousPinKey, bytes32 _pinKey, bytes32 _drbgValue) external;
 
-    function contestPin(bytes32 _sidechainId, bytes32 _pinKey) public;
+//    function contestPin(bytes32 _sidechainId, bytes32 _pinKey) external;
 
 
-    function contestPinRequestVote(bytes32 _sidechainId, bytes32 pinKey) public;
+//    function contestPinRequestVote(bytes32 _sidechainId, bytes32 pinKey) external;
 
 
 
@@ -177,7 +188,7 @@ interface SidechainManagementInterface {
  * @param _sidechainId The 256 bit identifier of the Sidechain.
  * @return true if the sidechain is managed by this contract.
  */
-    function getSidechainExists(bytes32 _sidechainId) public view returns (bool);
+//    function getSidechainExists(bytes32 _sidechainId) external view returns (bool);
 
     /**
      * Get the voting period being used in a sidechain.
@@ -185,7 +196,7 @@ interface SidechainManagementInterface {
      * @param _sidechainId The 256 bit identifier of the Sidechain.
      * @return Length of voting period in blocks.
      */
-    function getVotingPeriod(bytes32 _sidechainId) public view returns (uint);
+//    function getVotingPeriod(bytes32 _sidechainId) external view returns (uint);
 
     /**
      * Indicate if a certain account is an unmasked participant of a sidechain.
@@ -194,7 +205,7 @@ interface SidechainManagementInterface {
      * @param _participant Account to check to see if it is a participant.
      * @return true if _participant is an unmasked member of the sidechain.
      */
-    function isSidechainParticipant(bytes32 _sidechainId, address _participant) public view returns(bool);
+//    function isSidechainParticipant(bytes32 _sidechainId, address _participant) external view returns(bool);
 
     /**
      * Get the number of unmasked sidechain participants for a certain sidechain.
@@ -202,7 +213,7 @@ interface SidechainManagementInterface {
      * @param _sidechainId The 256 bit identifier of the Sidechain.
      * @return number of unmasked sidechain participants.
      */
-    function getNumberUnmaskedSidechainParticipants(bytes32 _sidechainId) public view returns(uint);
+//    function getNumberUnmaskedSidechainParticipants(bytes32 _sidechainId) external view returns(uint);
 
     /**
      * Get address of a certain unmasked sidechain participant. If the participant has been removed
@@ -212,7 +223,7 @@ interface SidechainManagementInterface {
      * @param _index The index into the list of sidechain participants.
      * @return Address of the participant, or 0x00.
      */
-    function getUnmaskedSidechainParticipant(bytes32 _sidechainId, int _index) public view returns(address);
+//    function getUnmaskedSidechainParticipant(bytes32 _sidechainId, int _index) external view returns(address);
 
     /**
      * Get the number of masked sidechain participants for a certain sidechain.
@@ -220,9 +231,9 @@ interface SidechainManagementInterface {
      * @param _sidechainId The 256 bit identifier of the Sidechain.
      * @return number of masked sidechain participants.
      */
-    function getNumberMaskedSidechainParticipants(bytes32 _sidechainId) public view returns(uint);
+//    function getNumberMaskedSidechainParticipants(bytes32 _sidechainId) external view returns(uint);
 
-    /**
+    /*
      * Get the salted hash of a masked sidechain participant. If the participant has been removed
      * or has been unmasked, at the given index, this function will return 0x00.
      *
@@ -230,14 +241,15 @@ interface SidechainManagementInterface {
      * @param _index The index into the list of sidechain masked participants.
      * @return Salted hash or the participant's address, or 0x00.
      */
-    function getMaskedSidechainParticipant(bytes32 _sidechainId, int _index) public view returns(bytes32);
+    //function getMaskedSidechainParticipant(bytes32 _sidechainId, int _index) external view returns(bytes32);
 
 
 
-    event AddingSidechainMaskedParticipant(bytes32 _sidechainId, bytes32 _participant);
-    event AddingSidechainUnmaskedParticipant(bytes32 _sidechainId, address _participant);
+    event AddedSidechain(uint256 _sidechainId);
+    event AddingSidechainMaskedParticipant(uint256 _sidechainId, bytes32 _participant);
+    event AddingSidechainUnmaskedParticipant(uint256 _sidechainId, address _participant);
 
-    event VoteResult(bytes32 _sidechainId, bytes32 _participant, uint16 _action, bool _result);
+    event VoteResult(uint256 _sidechainId, bytes32 _participant, uint16 _action, bool _result);
 
 
 }

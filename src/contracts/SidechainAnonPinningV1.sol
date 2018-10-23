@@ -1,3 +1,15 @@
+/*
+ * Copyright 2018 ConsenSys AG.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 pragma solidity ^0.4.23;
 
 import "./SidechainAnonPinningInterface.sol";
@@ -47,7 +59,7 @@ import "./VotingAlgInterface.sol";
  *
  *
  */
-contract SidechainManagement is SidechainManagementInterface is Ownable{
+contract SidechainAnonPinningV1 is SidechainAnonPinningInterface /* is Ownable */{
 
     // Indications that a vote is underway.
     // VOTE_NONE indicates no vote is underway. Also matches the deleted value for integers.
@@ -80,15 +92,15 @@ contract SidechainManagement is SidechainManagementInterface is Ownable{
 
     struct SidechainRecord {
         // Voting period in blocks. This is the period in which participants can vote. Must be greater than 0.
-        uint32 public votingPeriod;
+        uint64 votingPeriod;
 
         // Voting viewing period in blocks. This is the period between when the voting has completed and when
         // the vote can be actioned. Once the vote is actioned, all information about who voted and how they voted
         // is removed from the ledger.
-        uint32 public voteViewingPeriod;
+        uint64 voteViewingPeriod;
 
         // The algorithm for assessing the votes.
-        address public votingAlgorithmContract;
+        address votingAlgorithmContract;
 
 
         address[] unmasked;
@@ -105,7 +117,7 @@ contract SidechainManagement is SidechainManagementInterface is Ownable{
         uint64 minPinPeriod;
     }
 
-    mapping(bytes32=>SidechainRecord) private sidechains;
+    mapping(uint256=>SidechainRecord) private sidechains;
 
 
     bytes32 private constant EMPTY_PIN = 0x00;
@@ -127,7 +139,7 @@ contract SidechainManagement is SidechainManagementInterface is Ownable{
      * @param _sidechainId The 256 bit identifier of the Sidechain.
      * @dev Throws if the message sender isn't a participant in the sidechain, or if the sidechain doesn't exist.
      */
-    modifier onlySidechainParticipant(bytes32 _sidechainId) {
+    modifier onlySidechainParticipant(uint256 _sidechainId) {
         require(sidechains[_sidechainId].inUnmasked[msg.sender]);
         _;
     }
@@ -135,7 +147,8 @@ contract SidechainManagement is SidechainManagementInterface is Ownable{
 
 
     // Documented in interface.
-    function addSidechain(bytes32 _sidechainId, uint64 _votingPeriod, address _votingAlgorithmContract) public onlyOwner {
+    function addSidechain(uint256 _sidechainId, uint64 _votingPeriod, address _votingAlgorithmContract) external {
+//public onlyOwner {
         // The sidechain can not exist prior to creation.
         require(sidechains[_sidechainId].votingPeriod != 0);
         // The voting period must be greater than 0.
@@ -155,49 +168,49 @@ contract SidechainManagement is SidechainManagementInterface is Ownable{
 
 
     // Documented in interface.
-    function getSidechainExists(bytes32 _sidechainId) public view returns (bool) {
+    function getSidechainExists(uint256 _sidechainId) external view returns (bool) {
         return sidechains[_sidechainId].votingPeriod != 0;
     }
 
 
     // Documented in interface.
-    function getVotingPeriod(bytes32 _sidechainId) public view returns (uint) {
+    function getVotingPeriod(uint256 _sidechainId) external view returns (uint64) {
         return sidechains[_sidechainId].votingPeriod;
     }
 
 
     // Documented in interface.
-    function isSidechainParticipant(bytes32 _sidechainId, address _participant) public view returns(bool) {
+    function isSidechainParticipant(uint256 _sidechainId, address _participant) external view returns(bool) {
         return sidechains[_sidechainId].inUnmasked[_participant];
     }
 
 
     // Documented in interface.
-    function getNumberUnmaskedSidechainParticipants(bytes32 _sidechainId) public view returns(uint) {
+    function getNumberUnmaskedSidechainParticipants(uint256 _sidechainId) external view returns(uint) {
         return sidechains[_sidechainId].unmasked.length;
     }
 
 
     // Documented in interface.
-    function getUnmaskedSidechainParticipant(bytes32 _sidechainId, uint256 _index) public view returns(address) {
+    function getUnmaskedSidechainParticipant(uint256 _sidechainId, uint256 _index) external view returns(address) {
         return sidechains[_sidechainId].unmasked[_index];
     }
 
 
     // Documented in interface.
-    function getNumberMaskedSidechainParticipants(bytes32 _sidechainId) public view returns(uint) {
+    function getNumberMaskedSidechainParticipants(uint256 _sidechainId) external view returns(uint256) {
         return sidechains[_sidechainId].masked.length;
     }
 
 
     // Documented in interface.
-    function getMaskedSidechainParticipant(bytes32 _sidechainId, uint256 _index) public view returns(bytes32) {
+    function getMaskedSidechainParticipant(uint256 _sidechainId, uint256 _index) external view returns(bytes32) {
         return sidechains[_sidechainId].masked[_index];
     }
 
 
     // Documented in interface.
-    function unmask(bytes32 _sidechainId, uint256 _index, bytes32 _salt) public {
+    function unmask(uint256 _sidechainId, uint256 _index, uint256 _salt) external {
         bytes32 maskedParticipantActual = sidechains[_sidechainId].masked[_index];
         bytes32 maskedParticipantCalculated = keccak256(msg.sender, _salt);
         // An account can only unmask itself.
@@ -211,7 +224,7 @@ contract SidechainManagement is SidechainManagementInterface is Ownable{
 
 
     // Documented in interface.
-    function proposeVote(bytes32 _sidechainId, bytes32 _participant, uint16 _action) public onlySidechainParticipant(_sidechainId) {
+    function proposeVote(uint256 _sidechainId, bytes32 _participant, uint16 _action) external onlySidechainParticipant(_sidechainId) {
         // This will throw an error if the action is not a valid VoteType.
         VoteType action = VoteType(_action);
 
@@ -254,7 +267,7 @@ contract SidechainManagement is SidechainManagementInterface is Ownable{
 
 
     // Documented in interface.
-    function vote(bytes32 _sidechainId, bytes32 _participant, uint16 _action, bool _voteFor) public onlySidechainParticipant(_sidechainId) {
+    function vote(uint256 _sidechainId, bytes32 _participant, uint16 _action, bool _voteFor) external onlySidechainParticipant(_sidechainId) {
         // This will throw an error if the action is not a valid VoteType.
         VoteType action = VoteType(_action);
 
@@ -274,7 +287,7 @@ contract SidechainManagement is SidechainManagementInterface is Ownable{
 
 
     // Documented in interface.
-    function actionVotes(bytes32 _sidechainId, bytes32 _participant) public onlySidechainParticipant(_sidechainId) {
+    function actionVotes(uint256 _sidechainId, bytes32 _participant) external onlySidechainParticipant(_sidechainId) {
         // If no vote is underway, then there is nothing to action.
         VoteType action = sidechains[_sidechainId].votes[_participant].voteType;
         require(action != VoteType.VOTE_NONE);
@@ -317,7 +330,7 @@ contract SidechainManagement is SidechainManagementInterface is Ownable{
 
 
     // Documented in interface.
-    function addPin(bytes32 _pinKey, bytes32 _pin) public {
+    function addPin(bytes32 _pinKey, bytes32 _pin) external {
         // Can not add a pin if there is one already.
         require(pinningMap[_pinKey].pin == EMPTY_PIN);
 
@@ -328,13 +341,13 @@ contract SidechainManagement is SidechainManagementInterface is Ownable{
 
 
     // Documented in interface.
-    function getPin(bytes32 _pinKey) public view returns (bytes32) {
+    function getPin(bytes32 _pinKey) external view returns (bytes32) {
         return pinningMap[_pinKey].pin;
     }
 
 
     // Documented in interface.
-    function contestPin(bytes32 _sidechainId, bytes32 _previousPinKey, bytes32 _pinKey, bytes32 _drbgValue) public onlySidechainParticipant(_sidechainId) {
+    function contestPin(uint256 _sidechainId, bytes32 _previousPinKey, bytes32 _pinKey, uint256 _drbgValue) external onlySidechainParticipant(_sidechainId) {
         // The current pin key must have a pin entry.
         require(pinningMap[_pinKey].pin != EMPTY_PIN);
         // The current pin key must still be able to be contested.
@@ -360,7 +373,7 @@ contract SidechainManagement is SidechainManagementInterface is Ownable{
 
 
     // Documented in interface.
-    function contestPin(bytes32 _sidechainId, bytes32 _pinKey) public onlySidechainParticipant(_sidechainId) {
+    function contestPin(uint256 _sidechainId, bytes32 _pinKey) external onlySidechainParticipant(_sidechainId) {
         // The current pin key must have a pin entry.
         require(pinningMap[_pinKey].pin != EMPTY_PIN);
         // The current pin key must still be able to be contested.
@@ -378,7 +391,7 @@ contract SidechainManagement is SidechainManagementInterface is Ownable{
 
 
     // Documented in interface.
-    function contestPinRequestVote(bytes32 _sidechainId, bytes32 _pinKey) public onlySidechainParticipant(_sidechainId) {
+/*    function contestPinRequestVote(bytes32 _sidechainId, bytes32 _pinKey) external onlySidechainParticipant(_sidechainId) {
         // The current pin key must have a pin entry.
         require(pinningMap[_pinKey].pin != EMPTY_PIN);
         // The current pin key must still be able to be contested.
@@ -387,11 +400,6 @@ contract SidechainManagement is SidechainManagementInterface is Ownable{
         // TODO Pass the votes, and the number of unmasked participants who could have voted, to a voting contract
 
     }
+*/
 
-
-    event AddedSidechain(bytes32 _sidechainId);
-    event AddingSidechainMaskedParticipant(bytes32 _sidechainId, bytes32 _participant);
-    event AddingSidechainUnmaskedParticipant(bytes32 _sidechainId, address _participant);
-
-    event VoteResult(bytes32 _sidechainId, bytes32 _participant, uint16 _action, bool _result);
 }
