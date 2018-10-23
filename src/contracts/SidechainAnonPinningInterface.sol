@@ -86,7 +86,7 @@ interface SidechainAnonPinningInterface {
      * @param _index The index into the list of sidechain masked participants.
      * @return Salted hash or the participant's address, or 0x00.
      */
-//    function unmask(bytes32 _sidechainId, uint _index, bytes32 _salt) external;
+    function unmask(uint256 _sidechainId, uint256 _index, uint256 _salt) external;
 
     /**
      * Propose that a certain action be voted on.
@@ -96,7 +96,7 @@ interface SidechainAnonPinningInterface {
      *  to be voted on.
      * @param _action The action to be voted on.
      */
-//    function proposeVote(bytes32 _sidechainId, bytes32 _participant, uint _action) external;
+    function proposeVote(uint256 _sidechainId, bytes32 _participant, uint16 _action) external;
 
     /**
      * Vote for a proposal.
@@ -109,7 +109,7 @@ interface SidechainAnonPinningInterface {
      * @param _action The action to be voted on.
      * @param _voteFor True if the transaction sender wishes to vote for the action.
      */
-//    function vote(bytes32 _sidechainId, bytes32 _participant, uint _action, bool _voteFor) external;
+    function vote(uint256 _sidechainId, bytes32 _participant, uint16 _action, bool _voteFor) external;
 
     /**
      * Vote for a proposal.
@@ -120,7 +120,7 @@ interface SidechainAnonPinningInterface {
      * @param _participant Either a masked or unmasked participant which the vote pertains to.
      *          If it is an unmasked participant, then the value is an address.
      */
-//    function actionVotes(bytes32 _sidechainId, bytes32 _participant) external;
+    function actionVotes(uint256 _sidechainId, bytes32 _participant) external;
 
 
 
@@ -136,7 +136,7 @@ interface SidechainAnonPinningInterface {
      * @param _pinKey The pin key calculated as per the equation above.
      * @param _pin Value to be associated with the key.
      */
-//    function addPin(bytes32 _pinKey, bytes32 _pin) external;
+    function addPin(bytes32 _pinKey, bytes32 _pin) external;
 
 
     /**
@@ -151,7 +151,7 @@ interface SidechainAnonPinningInterface {
      * @param _pinKey The pin key calculated as per the equation above.
      * @return The pin at the key.
      */
-//    function getPin(bytes32 _pinKey) external view returns (bytes32);
+    function getPin(bytes32 _pinKey) external view returns (bytes32);
 
     /**
      * Contest a pin. The message sender must be an unmasked member of the sidechain,
@@ -173,9 +173,9 @@ interface SidechainAnonPinningInterface {
      * @param _pinKey The pin key calculated as per the equation above.
      * @param _drbgValue The next value in the DRBG sequence.
      */
-//    function contestPin(bytes32 _sidechainId, bytes32 _previousPinKey, bytes32 _pinKey, bytes32 _drbgValue) external;
+    function contestPin(uint256 _sidechainId, bytes32 _previousPinKey, bytes32 _pinKey, uint256 _drbgValue) external;
 
-//    function contestPin(bytes32 _sidechainId, bytes32 _pinKey) external;
+    function contestPin(uint256 _sidechainId, bytes32 _pinKey) external;
 
 
 //    function contestPinRequestVote(bytes32 _sidechainId, bytes32 pinKey) external;
@@ -183,12 +183,12 @@ interface SidechainAnonPinningInterface {
 
 
     /**
- * Indicate if this contract manages a certain sidechain.
- *
- * @param _sidechainId The 256 bit identifier of the Sidechain.
- * @return true if the sidechain is managed by this contract.
- */
-//    function getSidechainExists(bytes32 _sidechainId) external view returns (bool);
+     * Indicate if this contract manages a certain sidechain.
+     *
+     * @param _sidechainId The 256 bit identifier of the Sidechain.
+     * @return true if the sidechain is managed by this contract.
+    */
+    function getSidechainExists(uint256 _sidechainId) external view returns (bool);
 
     /**
      * Get the voting period being used in a sidechain.
@@ -196,7 +196,7 @@ interface SidechainAnonPinningInterface {
      * @param _sidechainId The 256 bit identifier of the Sidechain.
      * @return Length of voting period in blocks.
      */
-//    function getVotingPeriod(bytes32 _sidechainId) external view returns (uint);
+    function getVotingPeriod(uint256 _sidechainId) external view returns (uint64);
 
     /**
      * Indicate if a certain account is an unmasked participant of a sidechain.
@@ -205,7 +205,7 @@ interface SidechainAnonPinningInterface {
      * @param _participant Account to check to see if it is a participant.
      * @return true if _participant is an unmasked member of the sidechain.
      */
-//    function isSidechainParticipant(bytes32 _sidechainId, address _participant) external view returns(bool);
+    function isSidechainParticipant(uint256 _sidechainId, address _participant) external view returns(bool);
 
     /**
      * Get the number of unmasked sidechain participants for a certain sidechain.
@@ -213,7 +213,7 @@ interface SidechainAnonPinningInterface {
      * @param _sidechainId The 256 bit identifier of the Sidechain.
      * @return number of unmasked sidechain participants.
      */
-//    function getNumberUnmaskedSidechainParticipants(bytes32 _sidechainId) external view returns(uint);
+    function getNumberUnmaskedSidechainParticipants(uint256 _sidechainId) external view returns(uint256);
 
     /**
      * Get address of a certain unmasked sidechain participant. If the participant has been removed
@@ -223,7 +223,7 @@ interface SidechainAnonPinningInterface {
      * @param _index The index into the list of sidechain participants.
      * @return Address of the participant, or 0x00.
      */
-//    function getUnmaskedSidechainParticipant(bytes32 _sidechainId, int _index) external view returns(address);
+    function getUnmaskedSidechainParticipant(uint256 _sidechainId, uint256 _index) external view returns(address);
 
     /**
      * Get the number of masked sidechain participants for a certain sidechain.
@@ -231,7 +231,7 @@ interface SidechainAnonPinningInterface {
      * @param _sidechainId The 256 bit identifier of the Sidechain.
      * @return number of masked sidechain participants.
      */
-//    function getNumberMaskedSidechainParticipants(bytes32 _sidechainId) external view returns(uint);
+    function getNumberMaskedSidechainParticipants(uint256 _sidechainId) external view returns(uint256);
 
     /*
      * Get the salted hash of a masked sidechain participant. If the participant has been removed
@@ -241,7 +241,7 @@ interface SidechainAnonPinningInterface {
      * @param _index The index into the list of sidechain masked participants.
      * @return Salted hash or the participant's address, or 0x00.
      */
-    //function getMaskedSidechainParticipant(bytes32 _sidechainId, int _index) external view returns(bytes32);
+    function getMaskedSidechainParticipant(uint256 _sidechainId, uint256 _index) external view returns(bytes32);
 
 
 
