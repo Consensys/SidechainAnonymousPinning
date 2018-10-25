@@ -96,7 +96,7 @@ interface SidechainAnonPinningInterface {
      *  to be voted on.
      * @param _action The action to be voted on.
      */
-    function proposeVote(uint256 _sidechainId, bytes32 _participant, uint16 _action) external;
+    function proposeVote(uint256 _sidechainId, bytes32 _participant, uint16 _action, uint256 _additionalInfo) external;
 
     /**
      * Vote for a proposal.
@@ -175,7 +175,6 @@ interface SidechainAnonPinningInterface {
      */
     function contestPin(uint256 _sidechainId, bytes32 _previousPinKey, bytes32 _pinKey, uint256 _drbgValue) external;
 
-    function contestPin(uint256 _sidechainId, bytes32 _pinKey) external;
 
 
 //    function contestPinRequestVote(bytes32 _sidechainId, bytes32 pinKey) external;

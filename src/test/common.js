@@ -20,6 +20,7 @@ const SidechainAnonPinningV1 = artifacts.require("./SidechainAnonPinningV1.sol")
 // which are assumed to be part of the public API actually are in the interface.
 const SidechainAnonPinningInterface = artifacts.require("./SidechainAnonPinningInterface.sol");
 
+const VotingAlgMajority = artifacts.require("./VotingAlgMajority.sol");
 
 
 function sleep(ms) {
@@ -29,7 +30,7 @@ function sleep(ms) {
 
 module.exports = {
     getNewAnonPinning: async function() {
-        let instance = await SidechainAnonPinningV1.new();
+        let instance = await SidechainAnonPinningV1.new(1, VotingAlgMajority.deployed().address);
         let instanceAddress = instance.address;
         return await SidechainAnonPinningInterface.at(instanceAddress);
     },

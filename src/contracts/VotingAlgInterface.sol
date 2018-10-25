@@ -12,17 +12,19 @@
  */
 pragma solidity ^0.4.23;
 
-import "./Ownable.sol";
 
-contract AbstractVotingAlg is Ownable {
+/*
+* Interface which all voting algorithms must implement.
+*/
+interface VotingAlgInterface {
     /**
      * Asses a vote.
      *
-     * @param addressesVoted Array of addresses which voted.
-     * @param votedFor Array of bools indicating whether the addresses in the addressesVoted
-     *  array voted for or against the proposal.
+     * @param numParticipants Total number of participants.
+     * @param numVotedFor     Number of participants who voted for the proposal.
+     * @param numVotedAgainst Number of participants who voted against the proposal.
      * @return true if the result of the vote true. That is, given the voting algorithm
      *  the result of the vote is for what was being voted on.
      */
-    function assess(address[] addressesVoted, bool[] votedFor) public returns (bool);
+    function assess(uint32 numParticipants, uint32 numVotedFor, uint32 numVotedAgainst) external pure returns (bool);
 }

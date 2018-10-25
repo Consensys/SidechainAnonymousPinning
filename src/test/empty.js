@@ -10,30 +10,23 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
+
 /**
- * SidechainAnonPinningV1.sol unitinialised tests.
+ * SidechainAnonPinningV1.sol unitinialised tests. Check that the contract operates
+ * correctly when there are no sidechains in the contract or any other set-up.
  *
  */
 
 contract('Pinning: Empty Tests', function(accounts) {
     let common = require('./common');
 
-    const zeroSidechainId = "0x0";
-    const oneSidechainId = "0x1";
+    const twoSidechainId = "0x2";
 
-    const testAuthAddress1 = "0x0000000000000000000000000000000000000001";
-    const testAuthAddress2 = "0x2";
-    const testOrgInfoAddress1 = "0x0000000000000000000000000000000000000011";
-    const testOrgInfoAddress2 = "0x12";
-
-
-    const testDomainHash1 = "0x101";
-    const testDomainHash2 = "0x102";
 
 
     it("getSidechainExists", async function() {
         let pinningInterface = await await common.getDeployedAnonPinning();
-        const hasS = await pinningInterface.getSidechainExists.call(zeroSidechainId);
+        const hasS = await pinningInterface.getSidechainExists.call(twoSidechainId);
 
         assert.equal(hasS, false);
     });
