@@ -22,13 +22,19 @@ contract('Pinning: Empty Tests', function(accounts) {
 
     const twoSidechainId = "0x2";
 
-
-
-    it("getSidechainExists", async function() {
+    it("getSidechainExists for management sidechain", async function() {
         let pinningInterface = await await common.getDeployedAnonPinning();
-        const hasS = await pinningInterface.getSidechainExists.call(twoSidechainId);
+        const exists = await pinningInterface.getSidechainExists.call(common.MANAGEMENT_SIDECHAIN_DUMMY_ID);
 
-        assert.equal(hasS, false);
+        assert.equal(exists, true);
+    });
+
+
+    it("getSidechainExists for non-existent sidechain", async function() {
+        let pinningInterface = await await common.getDeployedAnonPinning();
+        const exists = await pinningInterface.getSidechainExists.call(twoSidechainId);
+
+        assert.equal(exists, false);
     });
 
     /*

@@ -22,20 +22,15 @@ contract('Add One Sidechain', function(accounts) {
     const twoSidechainId = "0x2";
     const oneSidechainId = "0x1";
 
-    const testAuthAddress1 = "0x0000000000000000000000000000000000000001";
-    const dummyVotingContractAddress = "0x0000000000000000000000000000000000000011";
-
-    const votingPeriod = 1;
-
 
     it("addSidechain", async function() {
         let pinningInterface = await await common.getNewAnonPinning();
-        await pinningInterface.addSidechain(twoSidechainId, votingPeriod, dummyVotingContractAddress);
+        await pinningInterface.addSidechain(twoSidechainId, common.A_VALID_VOTING_PERIOD, common.A_VALID_VOTING_CONTRACT_ADDRESS);
     });
 
     it("getSidechainExists for valid sidechain", async function() {
         let pinningInterface = await await common.getNewAnonPinning();
-        await pinningInterface.addSidechain(twoSidechainId, votingPeriod, dummyVotingContractAddress);
+        await pinningInterface.addSidechain(twoSidechainId, common.A_VALID_VOTING_PERIOD, common.A_VALID_VOTING_CONTRACT_ADDRESS);
 
         const hasD1 = await pinningInterface.getSidechainExists.call(twoSidechainId);
         assert.equal(hasD1, true, "Found sidechain 0");
@@ -44,7 +39,7 @@ contract('Add One Sidechain', function(accounts) {
 
     it("getSidechainExists for invalid sidechain", async function() {
         let pinningInterface = await await common.getNewAnonPinning();
-        await pinningInterface.addSidechain(twoSidechainId, votingPeriod, dummyVotingContractAddress);
+        await pinningInterface.addSidechain(twoSidechainId, common.A_VALID_VOTING_PERIOD, common.A_VALID_VOTING_CONTRACT_ADDRESS);
 
         const hasD2 = await pinningInterface.getSidechainExists.call(oneSidechainId);
         assert.equal(hasD2, false, "Unexpectedly found sidechain 1, which shouldn't exist");
@@ -54,8 +49,8 @@ contract('Add One Sidechain', function(accounts) {
         let votingPeriodTen = 10;
         let votingPeriodEleven = 11;
         let pinningInterface = await await common.getNewAnonPinning();
-        await pinningInterface.addSidechain(twoSidechainId, votingPeriodTen, dummyVotingContractAddress);
-        await pinningInterface.addSidechain(oneSidechainId, votingPeriodEleven, dummyVotingContractAddress);
+        await pinningInterface.addSidechain(twoSidechainId, votingPeriodTen, common.A_VALID_VOTING_CONTRACT_ADDRESS);
+        await pinningInterface.addSidechain(oneSidechainId, votingPeriodEleven, common.A_VALID_VOTING_CONTRACT_ADDRESS);
 
         const actualVotingPeriod = await pinningInterface.getVotingPeriod.call(twoSidechainId);
         assert.equal(actualVotingPeriod, votingPeriodTen, "zeroChainId returned unexpected voting period");
@@ -66,9 +61,9 @@ contract('Add One Sidechain', function(accounts) {
 
     it("isSidechainParticipant", async function() {
         let pinningInterface = await await common.getNewAnonPinning();
-        await pinningInterface.addSidechain(twoSidechainId, votingPeriod, dummyVotingContractAddress);
+        await pinningInterface.addSidechain(twoSidechainId, common.A_VALID_VOTING_PERIOD, common.A_VALID_VOTING_CONTRACT_ADDRESS);
 
-        const isPartBad = await pinningInterface.isSidechainParticipant.call(twoSidechainId, testAuthAddress1);
+        const isPartBad = await pinningInterface.isSidechainParticipant.call(twoSidechainId, accounts[1]);
         assert.equal(isPartBad, false, "unexpectedly, account which should not be part of the sidechain is");
 
         const isPartGood = await pinningInterface.isSidechainParticipant.call(twoSidechainId, accounts[0]);
@@ -77,7 +72,7 @@ contract('Add One Sidechain', function(accounts) {
 
     it("getNumberUnmaskedSidechainParticipants", async function() {
         let pinningInterface = await await common.getNewAnonPinning();
-        await pinningInterface.addSidechain(twoSidechainId, votingPeriod, dummyVotingContractAddress);
+        await pinningInterface.addSidechain(twoSidechainId, common.A_VALID_VOTING_PERIOD, common.A_VALID_VOTING_CONTRACT_ADDRESS);
 
         const numUnmasked = await pinningInterface.getNumberUnmaskedSidechainParticipants.call(twoSidechainId);
         assert.equal(numUnmasked, 1, "unexpected number of unmasked participants");
@@ -85,7 +80,7 @@ contract('Add One Sidechain', function(accounts) {
 
     it("getNumberMaskedSidechainParticipants", async function() {
         let pinningInterface = await await common.getNewAnonPinning();
-        await pinningInterface.addSidechain(twoSidechainId, votingPeriod, dummyVotingContractAddress);
+        await pinningInterface.addSidechain(twoSidechainId, common.A_VALID_VOTING_PERIOD, common.A_VALID_VOTING_CONTRACT_ADDRESS);
 
         const numMasked = await pinningInterface.getNumberMaskedSidechainParticipants.call(twoSidechainId);
         assert.equal(numMasked, 0, "unexpected number of unmasked participants");
