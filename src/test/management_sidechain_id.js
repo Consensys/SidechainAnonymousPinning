@@ -33,7 +33,7 @@ contract('Management Sidechain ID', function(accounts) {
         let pinningInterface = await await common.getDeployedAnonPinning();
         let didNotTriggerError = false;
         try {
-            await pinningInterface.addSidechain(common.MANAGEMENT_SIDECHAIN_DUMMY_ID, common.A_VALID_VOTING_PERIOD, "0x0123");
+            await pinningInterface.addSidechain(common.MANAGEMENT_SIDECHAIN_DUMMY_ID, common.A_VALID_VOTING_CONTRACT_ADDRESS, common.VOTING_PERIOD, common.VOTE_VIEWING_PERIOD);
             didNotTriggerError = true;
         } catch(err) {
             // Expect that a revert will be called as the transaction is being sent by an account other than the owner.
@@ -46,14 +46,14 @@ contract('Management Sidechain ID', function(accounts) {
 
     it("check that the account which deployed the contract can call addSidechain", async function() {
         let pinningInterface = await await common.getNewAnonPinning();
-        await pinningInterface.addSidechain(twoSidechainId, common.A_VALID_VOTING_PERIOD, common.A_VALID_VOTING_CONTRACT_ADDRESS);
+        await pinningInterface.addSidechain(twoSidechainId, common.A_VALID_VOTING_CONTRACT_ADDRESS, common.VOTING_PERIOD, common.VOTE_VIEWING_PERIOD);
     });
 
     it("check that accounts other than the one which deployed the contract can not call addSidechain", async function() {
         let pinningInterface = await await common.getNewAnonPinning();
         let didNotTriggerError = false;
         try {
-            await pinningInterface.addSidechain(twoSidechainId, common.A_VALID_VOTING_PERIOD, common.A_VALID_VOTING_CONTRACT_ADDRESS, {from: accounts[1]});
+            await pinningInterface.addSidechain(twoSidechainId, common.A_VALID_VOTING_CONTRACT_ADDRESS, common.VOTING_PERIOD, common.VOTE_VIEWING_PERIOD, {from: accounts[1]});
             didNotTriggerError = true;
         } catch(err) {
             // Expect that a revert will be called as the transaction is being sent by an account other than the owner.
@@ -62,5 +62,19 @@ contract('Management Sidechain ID', function(accounts) {
 
         assert.equal(didNotTriggerError, false);
     });
+
+
+    it("add an account to the management sidechain id", async function() {
+        let secondParticipant = accounts[1];
+        let pinningInterface = await await common.getNewAnonPinning();
+
+        await pinningInterface.proposeVote(common.MANAGEMENT_SIDECHAIN_DUMMY_ID, common.VOTE_ADD_UNMASKED_PARTICIPANT, secondParticipant, "0", "0");
+        await common.mineBlocks(parseInt(common.VOTING_PERIOD) + parseInt(common.VOTE_VIEWING_PERIOD));
+        await pinningInterface.actionVotes(common.MANAGEMENT_SIDECHAIN_DUMMY_ID, secondParticipant);
+
+        let isParticipant = await pinningInterface.isSidechainParticipant.call(common.MANAGEMENT_SIDECHAIN_DUMMY_ID, secondParticipant);
+        assert.equal(isParticipant, true, "unexpectedly, Second Participant: isSidechainParticipant == false");
+    });
+
 
 });

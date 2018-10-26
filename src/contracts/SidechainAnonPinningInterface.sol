@@ -75,7 +75,7 @@ interface SidechainAnonPinningInterface {
      * @param _votingPeriod The number of blocks by which time a vote must be finalized.
      * @param _votingAlgorithmContract The address of the initial contract to be used for all votes.
      */
-    function addSidechain(uint256 _sidechainId, uint64 _votingPeriod, address _votingAlgorithmContract) external;
+    function addSidechain(uint256 _sidechainId, address _votingAlgorithmContract, uint64 _votingPeriod, uint64 _voteViewingPeriod) external;
 
 
     /**
@@ -92,11 +92,10 @@ interface SidechainAnonPinningInterface {
      * Propose that a certain action be voted on.
      *
      * @param _sidechainId The 256 bit identifier of the Sidechain.
-     * @param _participant Either the masked address or the unmasked address (converted to a bytes32) of the entity
-     *  to be voted on.
-     * @param _action The action to be voted on.
+     * @param _action The type of vote: add or remove a masked or unmasked participant, challenge a pin.
+     * @param _voteTarget What is being voted on: a masked address or the unmasked address of a participant to be added or removed, or a pin to be disputed.
      */
-    function proposeVote(uint256 _sidechainId, bytes32 _participant, uint16 _action, uint256 _additionalInfo) external;
+    function proposeVote(uint256 _sidechainId, uint16 _action, uint256 _voteTarget, uint256 _additionalInfo1, uint256 _additionalInfo2) external;
 
     /**
      * Vote for a proposal.
@@ -104,12 +103,12 @@ interface SidechainAnonPinningInterface {
      * If an account has already voted, they can not vote again or change their vote.
      * Only members of the sidechain can vote.
      *
-     * @param _participant Either a masked or unmasked participant which the vote pertains to.
-     *          If it is an unmasked participant, then the value is an address.
-     * @param _action The action to be voted on.
+     * @param _sidechainId The 256 bit identifier of the Sidechain.
+     * @param _action The type of vote: add or remove a masked or unmasked participant, challenge a pin.
+     * @param _voteTarget What is being voted on: a masked address or the unmasked address of a participant to be added or removed, or a pin to be disputed.
      * @param _voteFor True if the transaction sender wishes to vote for the action.
      */
-    function vote(uint256 _sidechainId, bytes32 _participant, uint16 _action, bool _voteFor) external;
+    function vote(uint256 _sidechainId, uint16 _action, uint256 _voteTarget, bool _voteFor) external;
 
     /**
      * Vote for a proposal.
@@ -117,10 +116,10 @@ interface SidechainAnonPinningInterface {
      * If an account has already voted, they can vote again to change their vote.
      * Only members of the sidechain can action votes.
      *
-     * @param _participant Either a masked or unmasked participant which the vote pertains to.
-     *          If it is an unmasked participant, then the value is an address.
+     * @param _sidechainId The 256 bit identifier of the Sidechain.
+     * @param _voteTarget What is being voted on: a masked address or the unmasked address of a participant to be added or removed, or a pin to be disputed.
      */
-    function actionVotes(uint256 _sidechainId, bytes32 _participant) external;
+    function actionVotes(uint256 _sidechainId, uint256 _voteTarget) external;
 
 
 
@@ -240,7 +239,7 @@ interface SidechainAnonPinningInterface {
      * @param _index The index into the list of sidechain masked participants.
      * @return Salted hash or the participant's address, or 0x00.
      */
-    function getMaskedSidechainParticipant(uint256 _sidechainId, uint256 _index) external view returns(bytes32);
+    function getMaskedSidechainParticipant(uint256 _sidechainId, uint256 _index) external view returns(uint256);
 
 
 

@@ -27,6 +27,41 @@ const MANAGEMENT_SIDECHAIN_DUMMY_ID = "0";
 const A_VALID_VOTING_PERIOD = "1"; // A voting period which can be used in tests that need to specify a voting period.
 const A_VALID_VOTING_CONTRACT_ADDRESS = "0x123";//VotingAlgMajority.deployed().address;
 
+// Note that these values need to match what is set in the 1_initial_migration.js file.
+const VOTING_PERIOD = "3";
+const VOTE_VIEWING_PERIOD = "2";
+
+
+
+const VOTE_NONE = "0";
+const VOTE_ADD_MASKED_PARTICIPANT = "1";
+const VOTE_REMOVE_MASKED_PARTICIPANT = "2";
+const VOTE_ADD_UNMASKED_PARTICIPANT = "3";
+const VOTE_REMOVE_UNMASKED_PARTICIPANT = "4";
+const VOTE_CHALLENGE_PIN = "5";
+
+
+const mineOneBlock = async function() {
+    // Mine one or more blocks.
+    await web3.currentProvider.send({
+        jsonrpc: '2.0',
+        method: 'evm_mine',
+        params: [],
+        id: 0,
+    })
+};
+
+
+const mineBlocks = async function(n) {
+    for (let i = 0; i < n; i++) {
+        await mineOneBlock()
+    }
+}
+
+
+
+
+
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -34,12 +69,22 @@ function sleep(ms) {
 
 module.exports = {
     MANAGEMENT_SIDECHAIN_DUMMY_ID: MANAGEMENT_SIDECHAIN_DUMMY_ID,
-    A_VALID_VOTING_PERIOD: A_VALID_VOTING_PERIOD,
+
+
+    VOTE_NONE: VOTE_NONE,
+
+    VOTE_ADD_MASKED_PARTICIPANT: VOTE_ADD_MASKED_PARTICIPANT,
+    VOTE_REMOVE_MASKED_PARTICIPANT: VOTE_REMOVE_MASKED_PARTICIPANT,
+    VOTE_ADD_UNMASKED_PARTICIPANT: VOTE_ADD_UNMASKED_PARTICIPANT,
+    VOTE_REMOVE_UNMASKED_PARTICIPANT: VOTE_REMOVE_UNMASKED_PARTICIPANT,
+    VOTE_CHALLENGE_PIN: VOTE_CHALLENGE_PIN,
+
+    VOTING_PERIOD: VOTING_PERIOD,
+    VOTE_VIEWING_PERIOD: VOTE_VIEWING_PERIOD,
     A_VALID_VOTING_CONTRACT_ADDRESS: A_VALID_VOTING_CONTRACT_ADDRESS,
 
-
     getNewAnonPinning: async function() {
-        let instance = await SidechainAnonPinningV1.new(1, VotingAlgMajority.deployed().address);
+        let instance = await SidechainAnonPinningV1.new(VotingAlgMajority.deployed().address, VOTING_PERIOD, VOTE_VIEWING_PERIOD);
         let instanceAddress = instance.address;
         return await SidechainAnonPinningInterface.at(instanceAddress);
     },
@@ -48,6 +93,10 @@ module.exports = {
         let instanceAddress = instance.address;
         return await SidechainAnonPinningInterface.at(instanceAddress);
     },
+
+    mineOneBlock: mineOneBlock,
+
+    mineBlocks: mineBlocks,
 
     dumpAllDomainAddUpdateEvents: async function(eraInterface) {
         console.log("ContractAddress                                 Event           BlkNum DomainHash                 AuthorityAddress             OrgAddress                OwnerAddress");
