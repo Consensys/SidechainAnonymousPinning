@@ -10,6 +10,6 @@ module.exports = function(deployer) {
 
     deployer.deploy(VotingAlgMajority);
     deployer.deploy(VotingAlgMajorityWhoVoted).then(() => {
-        return deployer.deploy(Pinning, VotingAlgMajority.address, 3, 2);
+        return deployer.deploy(Pinning, VotingAlgMajority.address, 3);
     });
 };

@@ -23,13 +23,12 @@ const SidechainAnonPinningInterface = artifacts.require("./SidechainAnonPinningI
 const VotingAlgMajority = artifacts.require("./VotingAlgMajority.sol");
 
 
-const MANAGEMENT_SIDECHAIN_DUMMY_ID = "0";
+const MANAGEMENT_PSEUDO_SIDECHAIN_ID = "0";
 const A_VALID_VOTING_PERIOD = "1"; // A voting period which can be used in tests that need to specify a voting period.
 const A_VALID_VOTING_CONTRACT_ADDRESS = "0x123";//VotingAlgMajority.deployed().address;
 
 // Note that these values need to match what is set in the 1_initial_migration.js file.
 const VOTING_PERIOD = "3";
-const VOTE_VIEWING_PERIOD = "2";
 
 
 
@@ -68,7 +67,7 @@ function sleep(ms) {
 
 
 module.exports = {
-    MANAGEMENT_SIDECHAIN_DUMMY_ID: MANAGEMENT_SIDECHAIN_DUMMY_ID,
+    MANAGEMENT_PSEUDO_SIDECHAIN_ID: MANAGEMENT_PSEUDO_SIDECHAIN_ID,
 
 
     VOTE_NONE: VOTE_NONE,
@@ -80,11 +79,10 @@ module.exports = {
     VOTE_CHALLENGE_PIN: VOTE_CHALLENGE_PIN,
 
     VOTING_PERIOD: VOTING_PERIOD,
-    VOTE_VIEWING_PERIOD: VOTE_VIEWING_PERIOD,
     A_VALID_VOTING_CONTRACT_ADDRESS: A_VALID_VOTING_CONTRACT_ADDRESS,
 
     getNewAnonPinning: async function() {
-        let instance = await SidechainAnonPinningV1.new(VotingAlgMajority.deployed().address, VOTING_PERIOD, VOTE_VIEWING_PERIOD);
+        let instance = await SidechainAnonPinningV1.new(VotingAlgMajority.deployed().address, VOTING_PERIOD);
         let instanceAddress = instance.address;
         return await SidechainAnonPinningInterface.at(instanceAddress);
     },

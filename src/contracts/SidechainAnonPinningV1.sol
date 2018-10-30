@@ -60,7 +60,7 @@ import "./VotingAlgInterface.sol";
  *
  */
 contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
-    uint256 public constant MANAGEMENT_DUMMY_SIDECHAIN_ID = 0;
+    uint256 public constant MANAGEMENT_PSEUDO_SIDECHAIN_ID = 0;
 
 
     // Indications that a vote is underway.
@@ -95,12 +95,6 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
     struct SidechainRecord {
         // Voting period in blocks. This is the period in which participants can vote. Must be greater than 0.
         uint64 votingPeriod;
-
-        // Voting viewing period in blocks. This is the period between when the voting has completed and when
-        // the vote can be actioned. Once the vote is actioned, all information about who voted and how they voted
-        // is removed from the ledger.
-        uint64 voteViewingPeriod;
-
         // The algorithm for assessing the votes.
         address votingAlgorithmContract;
 
@@ -143,16 +137,16 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
         _;
     }
 
-    constructor (address _votingAlg, uint32 _votingPeriod, uint32 _voteViewingPeriod) public {
-        addSidechainInternal(MANAGEMENT_DUMMY_SIDECHAIN_ID, _votingAlg, _votingPeriod, _voteViewingPeriod);
+    constructor (address _votingAlg, uint32 _votingPeriod) public {
+        addSidechainInternal(MANAGEMENT_PSEUDO_SIDECHAIN_ID, _votingAlg, _votingPeriod);
     }
 
 
-    function addSidechain(uint256 _sidechainId, address _votingAlgorithmContract, uint64 _votingPeriod, uint64 _voteViewingPeriod) external onlySidechainParticipant(MANAGEMENT_DUMMY_SIDECHAIN_ID) {
-        addSidechainInternal(_sidechainId, _votingAlgorithmContract, _votingPeriod, _voteViewingPeriod);
+    function addSidechain(uint256 _sidechainId, address _votingAlgorithmContract, uint64 _votingPeriod) external onlySidechainParticipant(MANAGEMENT_PSEUDO_SIDECHAIN_ID) {
+        addSidechainInternal(_sidechainId, _votingAlgorithmContract, _votingPeriod);
     }
 
-    function addSidechainInternal(uint256 _sidechainId, address _votingAlgorithmContract, uint64 _votingPeriod, uint64 _voteViewingPeriod) private {
+    function addSidechainInternal(uint256 _sidechainId, address _votingAlgorithmContract, uint64 _votingPeriod) private {
         // The sidechain can not exist prior to creation.
         require(sidechains[_sidechainId].votingPeriod == 0);
         // The voting period must be greater than 0.
@@ -161,7 +155,6 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
 
         // Create the entry in the map by assigning values to the structure.
         sidechains[_sidechainId].votingPeriod = _votingPeriod;
-        sidechains[_sidechainId].voteViewingPeriod = _voteViewingPeriod;
         sidechains[_sidechainId].votingAlgorithmContract = _votingAlgorithmContract;
 
         // The creator of the sidechain is always an unmasked participant. Anyone who analysed the
@@ -246,7 +239,7 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
         VoteType action = sidechains[_sidechainId].votes[_voteTarget].voteType;
         require(action != VoteType.VOTE_NONE);
         // Can only action vote after voting period has ended.
-        require(sidechains[_sidechainId].votes[_voteTarget].endOfVotingBlockNumber + sidechains[_sidechainId].voteViewingPeriod <= block.number);
+        require(sidechains[_sidechainId].votes[_voteTarget].endOfVotingBlockNumber < block.number);
 
         VotingAlgInterface voteAlg = VotingAlgInterface(sidechains[_sidechainId].votingAlgorithmContract);
         bool result = true; //voteAlg.assess(sidechains[_sidechainId].votes[_voteTarget].addressVoted, sidechains[_sidechainId].votes[_voteTarget].addressVotedFor);

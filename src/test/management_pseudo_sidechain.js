@@ -12,18 +12,18 @@
  */
 
 /**
- * This file contains tests around the management sidechain ID.
+ * This file contains tests around the management pseudo sidechain.
  *
  */
 
-contract('Management Sidechain ID', function(accounts) {
+contract('Management Pseduo Sidechain', function(accounts) {
     let common = require('./common');
 
     const twoSidechainId = "0x2";
 
     it("getSidechainExists for management sidechain", async function() {
         let pinningInterface = await await common.getDeployedAnonPinning();
-        const exists = await pinningInterface.getSidechainExists.call(common.MANAGEMENT_SIDECHAIN_DUMMY_ID);
+        const exists = await pinningInterface.getSidechainExists.call(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID);
 
         assert.equal(exists, true);
     });
@@ -33,7 +33,7 @@ contract('Management Sidechain ID', function(accounts) {
         let pinningInterface = await await common.getDeployedAnonPinning();
         let didNotTriggerError = false;
         try {
-            await pinningInterface.addSidechain(common.MANAGEMENT_SIDECHAIN_DUMMY_ID, common.A_VALID_VOTING_CONTRACT_ADDRESS, common.VOTING_PERIOD, common.VOTE_VIEWING_PERIOD);
+            await pinningInterface.addSidechain(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, common.A_VALID_VOTING_CONTRACT_ADDRESS, common.VOTING_PERIOD, common.VOTE_VIEWING_PERIOD);
             didNotTriggerError = true;
         } catch(err) {
             // Expect that a revert will be called as the transaction is being sent by an account other than the owner.
@@ -68,11 +68,11 @@ contract('Management Sidechain ID', function(accounts) {
         let secondParticipant = accounts[1];
         let pinningInterface = await await common.getNewAnonPinning();
 
-        await pinningInterface.proposeVote(common.MANAGEMENT_SIDECHAIN_DUMMY_ID, common.VOTE_ADD_UNMASKED_PARTICIPANT, secondParticipant, "0", "0");
-        await common.mineBlocks(parseInt(common.VOTING_PERIOD) + parseInt(common.VOTE_VIEWING_PERIOD));
-        await pinningInterface.actionVotes(common.MANAGEMENT_SIDECHAIN_DUMMY_ID, secondParticipant);
+        await pinningInterface.proposeVote(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, common.VOTE_ADD_UNMASKED_PARTICIPANT, secondParticipant, "1", "2");
+        await common.mineBlocks(parseInt(common.VOTING_PERIOD));
+        await pinningInterface.actionVotes(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, secondParticipant);
 
-        let isParticipant = await pinningInterface.isSidechainParticipant.call(common.MANAGEMENT_SIDECHAIN_DUMMY_ID, secondParticipant);
+        let isParticipant = await pinningInterface.isSidechainParticipant.call(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, secondParticipant);
         assert.equal(isParticipant, true, "unexpectedly, Second Participant: isSidechainParticipant == false");
     });
 

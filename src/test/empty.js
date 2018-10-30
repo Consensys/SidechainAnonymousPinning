@@ -13,223 +13,108 @@
 
 /**
  * SidechainAnonPinningV1.sol unitinialised tests. Check that the contract operates
- * correctly when there are no sidechains in the contract or any other set-up.
+ * correctly when there are no sidechains in the contract - except for the management pseudo-sidechain.
  *
  */
 
 contract('Pinning: Empty Tests', function(accounts) {
     let common = require('./common');
 
-    const twoSidechainId = "0x2";
+    const NON_EXISTANT_SIDECHAIN = "0x2";
 
-    it("getSidechainExists for management sidechain", async function() {
+    it("getSidechainExists for management pseudo-sidechain", async function() {
         let pinningInterface = await await common.getDeployedAnonPinning();
-        const exists = await pinningInterface.getSidechainExists.call(common.MANAGEMENT_SIDECHAIN_DUMMY_ID);
+        const exists = await pinningInterface.getSidechainExists.call(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID);
 
         assert.equal(exists, true);
     });
 
+    it("getVotingPeriod for management pseudo-sidechain", async function() {
+        let pinningInterface = await await common.getDeployedAnonPinning();
+        const votingPeriod = await pinningInterface.getVotingPeriod.call(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID);
+        assert.equal(votingPeriod, common.VOTING_PERIOD);
+    });
+
+    it("isSidechainParticipant for management pseudo-sidechain: valid participant", async function() {
+        let pinningInterface = await await common.getDeployedAnonPinning();
+        const isParticipant = await pinningInterface.isSidechainParticipant.call(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, accounts[0]);
+        assert.equal(isParticipant, true);
+    });
+
+    it("isSidechainParticipant for management pseudo-sidechain: non-participant", async function() {
+        let pinningInterface = await await common.getDeployedAnonPinning();
+        const isParticipant = await pinningInterface.isSidechainParticipant.call(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, accounts[1]);
+        assert.equal(isParticipant, false);
+    });
+
+    it("getNumberUnmaskedSidechainParticipants for management pseudo-sidechain", async function() {
+        let pinningInterface = await await common.getDeployedAnonPinning();
+        const numParticipants = await pinningInterface.getNumberUnmaskedSidechainParticipants.call(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID);
+        assert.equal(numParticipants, "1");
+    });
+
+    it("getUnmaskedSidechainParticipant for management pseudo-sidechain: valid participant", async function() {
+        let pinningInterface = await await common.getDeployedAnonPinning();
+        const participant = await pinningInterface.getUnmaskedSidechainParticipant.call(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, 0);
+        assert.equal(participant, accounts[0]);
+    });
+
+    it("getNumberMaskedSidechainParticipants for management pseudo-sidechain", async function() {
+        let pinningInterface = await await common.getDeployedAnonPinning();
+        const numUnmaskedParticipants = await pinningInterface.getNumberMaskedSidechainParticipants.call(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID);
+        assert.equal(numUnmaskedParticipants, "0");
+    });
+
+
 
     it("getSidechainExists for non-existent sidechain", async function() {
         let pinningInterface = await await common.getDeployedAnonPinning();
-        const exists = await pinningInterface.getSidechainExists.call(twoSidechainId);
+        const exists = await pinningInterface.getSidechainExists.call(NON_EXISTANT_SIDECHAIN);
 
         assert.equal(exists, false);
     });
 
-    /*
-    it("getVotingPeriod", async function() {
-        let pinningInstance = await Pinning.new();
-        let pinningAddress = pinningInstance.address;
-        let pinningInterface = await AbstractPinning.at(pinningAddress);
-        let didNotTriggerError = false;
-        try {
-            const hasS = await pinningInterface.getVotingPeriod.call(zeroSidechainId);
-            didNotTriggerError = true;
-        } catch(err) {
-            // Expect that a revert will be called as the transaction is being sent by an account other than the owner.
-            //console.log("ERROR! " + err.message);
-        }
-
-        assert.equal(didNotTriggerError, false);
+    it("getVotingPeriod for non-existent sidechain", async function() {
+        let pinningInterface = await await common.getDeployedAnonPinning();
+        const votingPeriod = await pinningInterface.getVotingPeriod.call(NON_EXISTANT_SIDECHAIN);
+        assert.equal(votingPeriod, "0");
     });
 
-    it("isSidechainParticipant", async function() {
-        let pinningInstance = await Pinning.new();
-        let pinningAddress = pinningInstance.address;
-        let pinningInterface = await AbstractPinning.at(pinningAddress);
-        let didNotTriggerError = false;
-        try {
-            const hasS = await pinningInterface.isSidechainParticipant.call(zeroSidechainId, testOrgInfoAddress1);
-            didNotTriggerError = true;
-        } catch(err) {
-            // Expect that a revert will be called as the transaction is being sent by an account other than the owner.
-            //console.log("ERROR! " + err.message);
-        }
-
-        assert.equal(didNotTriggerError, false);
+    it("isSidechainParticipant for non-existent sidechain", async function() {
+        let pinningInterface = await await common.getDeployedAnonPinning();
+        const isParticipant = await pinningInterface.isSidechainParticipant.call(NON_EXISTANT_SIDECHAIN, accounts[0]);
+        assert.equal(isParticipant, false);
     });
 
-
-    it("getNumberUnmaskedSidechainParticipants", async function() {
-        let pinningInstance = await Pinning.new();
-        let pinningAddress = pinningInstance.address;
-        let pinningInterface = await AbstractPinning.at(pinningAddress);
-        let didNotTriggerError = false;
-        try {
-            const hasS = await pinningInterface.getNumberUnmaskedSidechainParticipants.call(zeroSidechainId, testOrgInfoAddress1);
-            didNotTriggerError = true;
-        } catch(err) {
-            // Expect that a revert will be called as the transaction is being sent by an account other than the owner.
-            //console.log("ERROR! " + err.message);
-        }
-
-        assert.equal(didNotTriggerError, false);
+    it("getNumberUnmaskedSidechainParticipants for non-existent sidechain", async function() {
+        let pinningInterface = await await common.getDeployedAnonPinning();
+        const numUnMaskedParticipants = await pinningInterface.getNumberUnmaskedSidechainParticipants.call(NON_EXISTANT_SIDECHAIN);
+        assert.equal(numUnMaskedParticipants, "0");
     });
 
-    it("getUnmaskedSidechainParticipant", async function() {
-        let pinningInstance = await Pinning.new();
-        let pinningAddress = pinningInstance.address;
-        let pinningInterface = await AbstractPinning.at(pinningAddress);
-        let didNotTriggerError = false;
-        try {
-            const hasS = await pinningInterface.getUnmaskedSidechainParticipant.call(zeroSidechainId, 1);
-            didNotTriggerError = true;
-        } catch(err) {
-            // Expect that a revert will be called as the transaction is being sent by an account other than the owner.
-            //console.log("ERROR! " + err.message);
-        }
-
-        assert.equal(didNotTriggerError, false);
+    it("getUnmaskedSidechainParticipant for non-existent sidechain", async function() {
+        console.log("TODO not working");
+        //let pinningInterface = await await common.getDeployedAnonPinning();
+        //const unmaskedParticipant = await pinningInterface.getUnmaskedSidechainParticipant.call(NON_EXISTANT_SIDECHAIN, 0);
+        //assert.equal(unmaskedParticipant, "0");
     });
 
-    it("getNumberMaskedSidechainParticipants", async function() {
-        let pinningInstance = await Pinning.new();
-        let pinningAddress = pinningInstance.address;
-        let pinningInterface = await AbstractPinning.at(pinningAddress);
-        let didNotTriggerError = false;
-        try {
-            const hasS = await pinningInterface.getNumberMaskedSidechainParticipants.call(zeroSidechainId);
-            didNotTriggerError = true;
-        } catch(err) {
-            // Expect that a revert will be called as the transaction is being sent by an account other than the owner.
-            //console.log("ERROR! " + err.message);
-        }
-
-        assert.equal(didNotTriggerError, false);
+    it("getNumberMaskedSidechainParticipants for non-existent sidechain", async function() {
+        let pinningInterface = await await common.getDeployedAnonPinning();
+        const numMaskedParticipants = await pinningInterface.getNumberMaskedSidechainParticipants.call(NON_EXISTANT_SIDECHAIN);
+        assert.equal(numMaskedParticipants, "0");
     });
 
-    it("getMaskedSidechainParticipant", async function() {
-        let pinningInstance = await Pinning.new();
-        let pinningAddress = pinningInstance.address;
-        let pinningInterface = await AbstractPinning.at(pinningAddress);
-        let didNotTriggerError = false;
-        try {
-            const hasS = await pinningInterface.getMaskedSidechainParticipant.call(zeroSidechainId, 1);
-            didNotTriggerError = true;
-        } catch(err) {
-            // Expect that a revert will be called as the transaction is being sent by an account other than the owner.
-            //console.log("ERROR! " + err.message);
-        }
-
-        assert.equal(didNotTriggerError, false);
+    it("getMaskedSidechainParticipant for non-existent sidechain", async function() {
+        console.log("TODO not working");
+        //let pinningInterface = await await common.getDeployedAnonPinning();
+        //const maskedParticipant = await pinningInterface.getMaskedSidechainParticipant.call(NON_EXISTANT_SIDECHAIN, 0);
+        //assert.equal(maskedParticipant, "0");
     });
 
-    it("unmask", async function() {
-        let pinningInstance = await Pinning.new();
-        let pinningAddress = pinningInstance.address;
-        let pinningInterface = await AbstractPinning.at(pinningAddress);
-        let didNotTriggerError = false;
-        try {
-            const hasS = await pinningInterface.unmask.call(zeroSidechainId, 1, oneSidechainId);
-            didNotTriggerError = true;
-        } catch(err) {
-            // Expect that a revert will be called as the transaction is being sent by an account other than the owner.
-            //console.log("ERROR! " + err.message);
-        }
-
-        assert.equal(didNotTriggerError, false);
+    it("getPin for non-existent sidechain", async function() {
+        let pinningInterface = await await common.getDeployedAnonPinning();
+        const pin = await pinningInterface.getPin.call(NON_EXISTANT_SIDECHAIN);
+        assert.equal(pin, "0x0000000000000000000000000000000000000000000000000000000000000000");
     });
-
-    it("proposeVote", async function() {
-        let pinningInstance = await Pinning.new();
-        let pinningAddress = pinningInstance.address;
-        let pinningInterface = await AbstractPinning.at(pinningAddress);
-        let didNotTriggerError = false;
-        try {
-            const hasS = await pinningInterface.proposeVote.call(zeroSidechainId, oneSidechainId, 1);
-            didNotTriggerError = true;
-        } catch(err) {
-            // Expect that a revert will be called as the transaction is being sent by an account other than the owner.
-            //console.log("ERROR! " + err.message);
-        }
-
-        assert.equal(didNotTriggerError, false);
-    });
-
-    it("vote", async function() {
-        let pinningInstance = await Pinning.new();
-        let pinningAddress = pinningInstance.address;
-        let pinningInterface = await AbstractPinning.at(pinningAddress);
-        let didNotTriggerError = false;
-        try {
-            const hasS = await pinningInterface.vote.call(zeroSidechainId, oneSidechainId, true);
-            didNotTriggerError = true;
-        } catch(err) {
-            // Expect that a revert will be called as the transaction is being sent by an account other than the owner.
-            //console.log("ERROR! " + err.message);
-        }
-
-        assert.equal(didNotTriggerError, false);
-    });
-
-    it("actionVotes", async function() {
-        let pinningInstance = await Pinning.new();
-        let pinningAddress = pinningInstance.address;
-        let pinningInterface = await AbstractPinning.at(pinningAddress);
-        let didNotTriggerError = false;
-        try {
-            const hasS = await pinningInterface.actionVotes.call(zeroSidechainId, oneSidechainId);
-            didNotTriggerError = true;
-        } catch(err) {
-            // Expect that a revert will be called as the transaction is being sent by an account other than the owner.
-            //console.log("ERROR! " + err.message);
-        }
-
-        assert.equal(didNotTriggerError, false);
-    });
-
-    it("addPin", async function() {
-        let pinningInstance = await Pinning.new();
-        let pinningAddress = pinningInstance.address;
-        let pinningInterface = await AbstractPinning.at(pinningAddress);
-        let didNotTriggerError = false;
-        try {
-            const hasS = await pinningInterface.addPin.call(zeroSidechainId, oneSidechainId);
-            didNotTriggerError = true;
-        } catch(err) {
-            // Expect that a revert will be called as the transaction is being sent by an account other than the owner.
-            //console.log("ERROR! " + err.message);
-        }
-
-        assert.equal(didNotTriggerError, false);
-    });
-
-    it("getPin", async function() {
-        let pinningInstance = await Pinning.new();
-        let pinningAddress = pinningInstance.address;
-        let pinningInterface = await AbstractPinning.at(pinningAddress);
-        let didNotTriggerError = false;
-        try {
-            const hasS = await pinningInterface.getPin.call(zeroSidechainId);
-            didNotTriggerError = true;
-        } catch(err) {
-            // Expect that a revert will be called as the transaction is being sent by an account other than the owner.
-            //console.log("ERROR! " + err.message);
-        }
-
-        assert.equal(didNotTriggerError, false);
-    });
-
-    */
 });

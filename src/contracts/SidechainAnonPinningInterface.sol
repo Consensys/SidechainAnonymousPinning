@@ -75,7 +75,7 @@ interface SidechainAnonPinningInterface {
      * @param _votingPeriod The number of blocks by which time a vote must be finalized.
      * @param _votingAlgorithmContract The address of the initial contract to be used for all votes.
      */
-    function addSidechain(uint256 _sidechainId, address _votingAlgorithmContract, uint64 _votingPeriod, uint64 _voteViewingPeriod) external;
+    function addSidechain(uint256 _sidechainId, address _votingAlgorithmContract, uint64 _votingPeriod) external;
 
 
     /**
