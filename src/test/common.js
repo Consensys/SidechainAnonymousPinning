@@ -24,11 +24,12 @@ const VotingAlgMajority = artifacts.require("./VotingAlgMajority.sol");
 
 
 const MANAGEMENT_PSEUDO_SIDECHAIN_ID = "0";
-const A_VALID_VOTING_PERIOD = "1"; // A voting period which can be used in tests that need to specify a voting period.
 const A_VALID_VOTING_CONTRACT_ADDRESS = "0x123";//VotingAlgMajority.deployed().address;
 
 // Note that these values need to match what is set in the 1_initial_migration.js file.
 const VOTING_PERIOD = "3";
+const VOTING_PERIOD_PLUS_ONE = "4";
+const VOTING_PERIOD_MINUS_ONE = "2";
 
 
 
@@ -39,6 +40,7 @@ const VOTE_ADD_UNMASKED_PARTICIPANT = "3";
 const VOTE_REMOVE_UNMASKED_PARTICIPANT = "4";
 const VOTE_CHALLENGE_PIN = "5";
 
+const REVERT = "VM Exception while processing transaction: revert";
 
 const mineOneBlock = async function() {
     // Mine one or more blocks.
@@ -79,10 +81,14 @@ module.exports = {
     VOTE_CHALLENGE_PIN: VOTE_CHALLENGE_PIN,
 
     VOTING_PERIOD: VOTING_PERIOD,
+    VOTING_PERIOD_PLUS_ONE: VOTING_PERIOD_PLUS_ONE,
+    VOTING_PERIOD_MINUS_ONE: VOTING_PERIOD_MINUS_ONE,
     A_VALID_VOTING_CONTRACT_ADDRESS: A_VALID_VOTING_CONTRACT_ADDRESS,
 
+    REVERT: REVERT,
+
     getNewAnonPinning: async function() {
-        let instance = await SidechainAnonPinningV1.new(VotingAlgMajority.deployed().address, VOTING_PERIOD);
+        let instance = await SidechainAnonPinningV1.new((await VotingAlgMajority.deployed()).address, VOTING_PERIOD);
         let instanceAddress = instance.address;
         return await SidechainAnonPinningInterface.at(instanceAddress);
     },
@@ -95,6 +101,23 @@ module.exports = {
     mineOneBlock: mineOneBlock,
 
     mineBlocks: mineBlocks,
+
+    // Pass in a contract instance and expected value to retrieve the number of emitted events and run an assertion.
+    checkVotingResult: async function(pinningInterface, expectedValue) {
+        await pinningInterface.VoteResult({}, {fromBlock: "latest", toBlock: "latest"}).get(function(error, result){
+            if (error) {
+                console.log(error);
+                throw error;
+
+            }
+
+            assert.equal(1, result.length); // Only handle one result
+            assert.equal(expectedValue, result[0].args._result);
+        });
+    },
+
+
+
 
     dumpAllDomainAddUpdateEvents: async function(eraInterface) {
         console.log("ContractAddress                                 Event           BlkNum DomainHash                 AuthorityAddress             OrgAddress                OwnerAddress");

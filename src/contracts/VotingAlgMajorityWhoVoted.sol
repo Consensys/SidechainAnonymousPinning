@@ -20,7 +20,7 @@ import "./VotingAlgInterface.sol";
 */
 contract VotingAlgMajorityWhoVoted is VotingAlgInterface {
 
-    function assess(uint32 /* numParticipants */, uint32 numVotedFor, uint32 numVotedAgainst) external pure returns (bool) {
+    function assess(uint64 /* numParticipants */, uint64 numVotedFor, uint64 numVotedAgainst) external pure returns (bool) {
         return (numVotedFor > numVotedAgainst);
     }
 }

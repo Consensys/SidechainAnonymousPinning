@@ -26,5 +26,5 @@ interface VotingAlgInterface {
      * @return true if the result of the vote true. That is, given the voting algorithm
      *  the result of the vote is for what was being voted on.
      */
-    function assess(uint32 numParticipants, uint32 numVotedFor, uint32 numVotedAgainst) external pure returns (bool);
+    function assess(uint64 numParticipants, uint64 numVotedFor, uint64 numVotedAgainst) external pure returns (bool);
 }

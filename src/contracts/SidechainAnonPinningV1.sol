@@ -87,21 +87,30 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
         // independent of number of participants.
         mapping(address=>bool) hasVoted;
         // The number of participants who voted for the proposal.
-        uint32 numVotedFor;
+        uint64 numVotedFor;
         // The number of participants who voted against the proposal.
-        uint32 numVotedAgainst;
+        uint64 numVotedAgainst;
     }
 
     struct SidechainRecord {
-        // Voting period in blocks. This is the period in which participants can vote. Must be greater than 0.
-        uint64 votingPeriod;
         // The algorithm for assessing the votes.
         address votingAlgorithmContract;
+        // Voting period in blocks. This is the period in which participants can vote. Must be greater than 0.
+        uint64 votingPeriod;
 
-
+        // The number of unmasked participants.
+        // Note that this value could be less than the size of the unmasked array as some of the participants
+        // may have been removed.
+        uint64 numUnmaskedParticipants;
+        // Array of participants who can vote.
+        // Note that this array could contain empty values, indicating that the participant has been removed.
         address[] unmasked;
         // Have map as well as array to ensure constant time / constant cost look-up, independent of number of participants.
         mapping(address=>bool) inUnmasked;
+
+        // Array of masked participant. These participants can not vote.
+        // Note that this array could contain empty values, indicating that the masked participant has been removed
+        // or has been unmasked.
         uint256[] masked;
         // Have map as well as array to ensure constant time / constant cost look-up, independent of number of participants.
         mapping(uint256=>bool) inMasked;
@@ -162,6 +171,11 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
         // transaction.
         sidechains[_sidechainId].unmasked.push(msg.sender);
         sidechains[_sidechainId].inUnmasked[msg.sender] = true;
+        sidechains[_sidechainId].numUnmaskedParticipants++;
+
+
+        emit Dump(_sidechainId, 0, sidechains[_sidechainId].votingAlgorithmContract);
+
     }
 
 
@@ -224,12 +238,15 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
         // Check voting period has not expired.
         require(sidechains[_sidechainId].votes[_voteTarget].endOfVotingBlockNumber >= block.number);
 
-        // TODO check voting period has not expired.
-
         // Indicate msg.sender has voted.
-//        sidechains[_sidechainId].votes[_participant].addressVoted.push(msg.sender);
-//        sidechains[_sidechainId].votes[_participant].addressVotedFor.push(_voteFor);
+        emit ParticipantVoted(_sidechainId, msg.sender, _action, _voteTarget, _voteFor);
         sidechains[_sidechainId].votes[_voteTarget].hasVoted[msg.sender] = true;
+
+        if (_voteFor) {
+            sidechains[_sidechainId].votes[_voteTarget].numVotedFor++;
+        } else {
+            sidechains[_sidechainId].votes[_voteTarget].numVotedAgainst++;
+        }
     }
 
 
@@ -241,13 +258,16 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
         // Can only action vote after voting period has ended.
         require(sidechains[_sidechainId].votes[_voteTarget].endOfVotingBlockNumber < block.number);
 
+
         VotingAlgInterface voteAlg = VotingAlgInterface(sidechains[_sidechainId].votingAlgorithmContract);
-        bool result = true; //voteAlg.assess(sidechains[_sidechainId].votes[_voteTarget].addressVoted, sidechains[_sidechainId].votes[_voteTarget].addressVotedFor);
-//        bool result = voteAlg.assess(dataHolder.numParticipants(), votes[_participant].numVotedFor, votes[_participant].numVotedAgainst);
+        bool result = voteAlg.assess(
+                sidechains[_sidechainId].numUnmaskedParticipants,
+                sidechains[_sidechainId].votes[_voteTarget].numVotedFor,
+                sidechains[_sidechainId].votes[_voteTarget].numVotedAgainst);
 
+//        bool result = true;
+        emit VoteResult(_sidechainId, uint16(action), _voteTarget, result);
 
-
-//        emit VoteResult(_sidechainId, _participant, uint16(action), result);
 
         if (result) {
             // The vote has been decided in the affimative.
@@ -255,6 +275,7 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
                 address newParticipant = address(_voteTarget);
                 sidechains[_sidechainId].unmasked.push(newParticipant);
                 sidechains[_sidechainId].inUnmasked[newParticipant] = true;
+                sidechains[_sidechainId].numUnmaskedParticipants++;
             }
 // TODO process other types of votes.
 

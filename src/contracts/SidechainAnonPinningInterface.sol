@@ -247,7 +247,9 @@ interface SidechainAnonPinningInterface {
     event AddingSidechainMaskedParticipant(uint256 _sidechainId, bytes32 _participant);
     event AddingSidechainUnmaskedParticipant(uint256 _sidechainId, address _participant);
 
-    event VoteResult(uint256 _sidechainId, bytes32 _participant, uint16 _action, bool _result);
+    event ParticipantVoted(uint256 _sidechainId, address _participant, uint16 _action, uint256 _voteTarget, bool _votedFor);
+    event VoteResult(uint256 _sidechainId, uint16 _action, uint256 _voteTarget, bool _result);
 
+    event Dump(uint256 a, uint256 b, address c);
 
 }
