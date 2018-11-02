@@ -25,7 +25,8 @@ contract('Voting: general tests', function(accounts) {
         await pinningInterface.proposeVote(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, common.VOTE_ADD_UNMASKED_PARTICIPANT, secondParticipant, "1", "2");
         await common.mineBlocks(parseInt(common.VOTING_PERIOD));
         await pinningInterface.actionVotes(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, secondParticipant);
-        await common.checkVotingResult(pinningInterface, true);
+        const result = await common.checkVotingResult(pinningInterface);
+        assert.equal(true, result, "incorrect result reported in event");
 
         let isParticipant = await pinningInterface.isSidechainParticipant.call(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, secondParticipant);
         assert.equal(isParticipant, true, "unexpectedly, Second Participant: isSidechainParticipant == false");
@@ -38,7 +39,8 @@ contract('Voting: general tests', function(accounts) {
         await pinningInterface.proposeVote(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, common.VOTE_ADD_UNMASKED_PARTICIPANT, secondParticipant, "1", "2");
         await common.mineBlocks(parseInt(common.VOTING_PERIOD_PLUS_ONE));
         await pinningInterface.actionVotes(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, secondParticipant);
-        await common.checkVotingResult(pinningInterface, true);
+        const result = await common.checkVotingResult(pinningInterface);
+        assert.equal(true, result, "incorrect result reported in event");
 
         let isParticipant = await pinningInterface.isSidechainParticipant.call(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, secondParticipant);
         assert.equal(isParticipant, true, "unexpectedly, Second Participant: isSidechainParticipant == false");

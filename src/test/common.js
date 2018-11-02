@@ -103,20 +103,22 @@ module.exports = {
     mineBlocks: mineBlocks,
 
     // Pass in a contract instance and expected value to retrieve the number of emitted events and run an assertion.
-    checkVotingResult: async function(pinningInterface, expectedValue) {
-        await pinningInterface.VoteResult({}, {fromBlock: "latest", toBlock: "latest"}).get(function(error, result){
-            if (error) {
-                console.log(error);
-                throw error;
+    checkVotingResult: async function(pinningInterface) {
+        return new Promise( (resolve, reject) => {
+            pinningInterface.VoteResult({}, {fromBlock: "latest", toBlock: "latest"}).get(function(error, result){
+                if (error) {
+                    console.log(error);
+                    reject(error);
+                }
 
-            }
-
-            assert.equal(1, result.length); // Only handle one result
-            assert.equal(expectedValue, result[0].args._result);
+                if (result.length===1) {
+                    resolve(result[0].args._result);
+                } else {
+                    reject("Number of results returned: " + result.length)
+                }
+            });
         });
     },
-
-
 
 
     dumpAllDomainAddUpdateEvents: async function(eraInterface) {
