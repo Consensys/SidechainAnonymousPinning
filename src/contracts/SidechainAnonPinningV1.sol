@@ -171,10 +171,10 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
         // transaction.
         sidechains[_sidechainId].unmasked.push(msg.sender);
         sidechains[_sidechainId].inUnmasked[msg.sender] = true;
+//        emit Dump(_sidechainId, 0, sidechains[_sidechainId].numUnmaskedParticipants);
         sidechains[_sidechainId].numUnmaskedParticipants++;
-
-
-        emit Dump(_sidechainId, 0, sidechains[_sidechainId].votingAlgorithmContract);
+//        emit Dump(_sidechainId, 0, sidechains[_sidechainId].numUnmaskedParticipants);
+//        emit Dump(_sidechainId, 0, sidechains[_sidechainId].votingAlgorithmContract);
 
     }
 
@@ -253,6 +253,10 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
         // Can only action vote after voting period has ended.
         require(sidechains[_sidechainId].votes[_voteTarget].endOfVotingBlockNumber < block.number);
 
+        emit Dump(sidechains[_sidechainId].numUnmaskedParticipants, sidechains[_sidechainId].votes[_voteTarget].numVotedFor,
+            sidechains[_sidechainId].votes[_voteTarget].numVotedAgainst
+        );
+
 
         VotingAlgInterface voteAlg = VotingAlgInterface(sidechains[_sidechainId].votingAlgorithmContract);
         bool result = voteAlg.assess(
@@ -270,7 +274,9 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
                 address newParticipant = address(_voteTarget);
                 sidechains[_sidechainId].unmasked.push(newParticipant);
                 sidechains[_sidechainId].inUnmasked[newParticipant] = true;
+//                emit Dump(_sidechainId, 0, sidechains[_sidechainId].numUnmaskedParticipants);
                 sidechains[_sidechainId].numUnmaskedParticipants++;
+  //              emit Dump(_sidechainId, 0, sidechains[_sidechainId].numUnmaskedParticipants);
             }
 // TODO process other types of votes.
 
