@@ -217,11 +217,14 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
             require(sidechains[_sidechainId].inUnmasked[address(_voteTarget)] == true);
         }
 
-        // The vote proposer is recorded as the entity which submitted this transaction.
+        // Set-up the vote.
         sidechains[_sidechainId].votes[_voteTarget].voteType = action;
         sidechains[_sidechainId].votes[_voteTarget].endOfVotingBlockNumber = block.number + sidechains[_sidechainId].votingPeriod;
         sidechains[_sidechainId].votes[_voteTarget].additionalInfo1 = _additionalInfo1;
         sidechains[_sidechainId].votes[_voteTarget].additionalInfo2 = _additionalInfo2;
+
+        // The proposer is deemed to be voting for the proposal.
+        voteNoChecks(_sidechainId, _action, _voteTarget, true);
     }
 
 
@@ -238,15 +241,7 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
         // Check voting period has not expired.
         require(sidechains[_sidechainId].votes[_voteTarget].endOfVotingBlockNumber >= block.number);
 
-        // Indicate msg.sender has voted.
-        emit ParticipantVoted(_sidechainId, msg.sender, _action, _voteTarget, _voteFor);
-        sidechains[_sidechainId].votes[_voteTarget].hasVoted[msg.sender] = true;
-
-        if (_voteFor) {
-            sidechains[_sidechainId].votes[_voteTarget].numVotedFor++;
-        } else {
-            sidechains[_sidechainId].votes[_voteTarget].numVotedAgainst++;
-        }
+        voteNoChecks(_sidechainId, _action, _voteTarget, _voteFor);
     }
 
 
@@ -356,6 +351,25 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
 
     }
 */
+
+    /**
+    * This function is used to indicate that an entity has voted. It has been created so that
+    * calls to proposeVote do not have to incur all of the value checking in the vote call.
+    *
+    * TODO: Compare gas usage of keeping this integrated with the value checking.
+    */
+    function voteNoChecks(uint256 _sidechainId, uint16 _action, uint256 _voteTarget, bool _voteFor) private {
+        // Indicate msg.sender has voted.
+        emit ParticipantVoted(_sidechainId, msg.sender, _action, _voteTarget, _voteFor);
+        sidechains[_sidechainId].votes[_voteTarget].hasVoted[msg.sender] = true;
+
+        if (_voteFor) {
+            sidechains[_sidechainId].votes[_voteTarget].numVotedFor++;
+        } else {
+            sidechains[_sidechainId].votes[_voteTarget].numVotedAgainst++;
+        }
+    }
+
 
 
     function getSidechainExists(uint256 _sidechainId) external view returns (bool) {

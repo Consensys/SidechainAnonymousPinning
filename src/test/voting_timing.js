@@ -11,11 +11,11 @@
  * specific language governing permissions and limitations under the License.
  */
 /**
- * SidechainAnonPinningV1.sol check voting aspects of the contracts
+ * SidechainAnonPinningV1.sol check timing aspects of voting.
  *
  */
 
-contract('Voting: general tests', function(accounts) {
+contract('Voting: timing tests', function(accounts) {
     let common = require('./common');
 
     it("finalise vote immediately after voting period", async function() {

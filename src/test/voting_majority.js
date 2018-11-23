@@ -11,7 +11,7 @@
  * specific language governing permissions and limitations under the License.
  */
 /**
- * SidechainAnonPinningV1.sol check voting aspects of the contracts
+ * SidechainAnonPinningV1.sol check the voting algorithm: majority
  *
  */
 const VotingAlgMajority = artifacts.require("./VotingAlgMajority.sol");
