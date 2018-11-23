@@ -274,9 +274,7 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
                 address newParticipant = address(_voteTarget);
                 sidechains[_sidechainId].unmasked.push(newParticipant);
                 sidechains[_sidechainId].inUnmasked[newParticipant] = true;
-//                emit Dump(_sidechainId, 0, sidechains[_sidechainId].numUnmaskedParticipants);
                 sidechains[_sidechainId].numUnmaskedParticipants++;
-  //              emit Dump(_sidechainId, 0, sidechains[_sidechainId].numUnmaskedParticipants);
             }
 // TODO process other types of votes.
 
