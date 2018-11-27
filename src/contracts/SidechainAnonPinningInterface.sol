@@ -91,6 +91,15 @@ interface SidechainAnonPinningInterface {
     /**
      * Propose that a certain action be voted on.
      *
+     * Types of votes:
+     *
+     * Value  Action                                 _additionalInfo1                 _additionalInfo2
+     * 1      Vote to add a masked participant.      Not used                         Not used
+     * 2      Vote to remove a masked participant    Index into array of participant  Not used
+     * 3      Vote to add an unmasked participant    Not used                         Not used
+     * 4      Vote to remove an unmasked participant Index into array of participant  Not used.
+     * 5      Challenge pin.                         TBD                              TBD
+     *
      * @param _sidechainId The 256 bit identifier of the Sidechain.
      * @param _action The type of vote: add or remove a masked or unmasked participant, challenge a pin.
      * @param _voteTarget What is being voted on: a masked address or the unmasked address of a participant to be added or removed, or a pin to be disputed.
