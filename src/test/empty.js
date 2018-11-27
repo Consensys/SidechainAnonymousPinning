@@ -47,9 +47,9 @@ contract('Pinning: Empty Tests', function(accounts) {
         assert.equal(isParticipant, false);
     });
 
-    it("getNumberUnmaskedSidechainParticipants for management pseudo-sidechain", async function() {
+    it("getUnmaskedSidechainParticipantsSize for management pseudo-sidechain", async function() {
         let pinningInterface = await await common.getDeployedAnonPinning();
-        const numParticipants = await pinningInterface.getNumberUnmaskedSidechainParticipants.call(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID);
+        const numParticipants = await pinningInterface.getUnmaskedSidechainParticipantsSize.call(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID);
         assert.equal(numParticipants, "1");
     });
 
@@ -59,9 +59,9 @@ contract('Pinning: Empty Tests', function(accounts) {
         assert.equal(participant, accounts[0]);
     });
 
-    it("getNumberMaskedSidechainParticipants for management pseudo-sidechain", async function() {
+    it("getMaskedSidechainParticipantsSize for management pseudo-sidechain", async function() {
         let pinningInterface = await await common.getDeployedAnonPinning();
-        const numUnmaskedParticipants = await pinningInterface.getNumberMaskedSidechainParticipants.call(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID);
+        const numUnmaskedParticipants = await pinningInterface.getMaskedSidechainParticipantsSize.call(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID);
         assert.equal(numUnmaskedParticipants, "0");
     });
 
@@ -86,9 +86,9 @@ contract('Pinning: Empty Tests', function(accounts) {
         assert.equal(isParticipant, false);
     });
 
-    it("getNumberUnmaskedSidechainParticipants for non-existent sidechain", async function() {
+    it("getUnmaskedSidechainParticipantsSize for non-existent sidechain", async function() {
         let pinningInterface = await await common.getDeployedAnonPinning();
-        const numUnMaskedParticipants = await pinningInterface.getNumberUnmaskedSidechainParticipants.call(NON_EXISTANT_SIDECHAIN);
+        const numUnMaskedParticipants = await pinningInterface.getUnmaskedSidechainParticipantsSize.call(NON_EXISTANT_SIDECHAIN);
         assert.equal(numUnMaskedParticipants, "0");
     });
 
@@ -99,9 +99,9 @@ contract('Pinning: Empty Tests', function(accounts) {
         //assert.equal(unmaskedParticipant, "0");
     });
 
-    it("getNumberMaskedSidechainParticipants for non-existent sidechain", async function() {
+    it("getMaskedSidechainParticipantsSize for non-existent sidechain", async function() {
         let pinningInterface = await await common.getDeployedAnonPinning();
-        const numMaskedParticipants = await pinningInterface.getNumberMaskedSidechainParticipants.call(NON_EXISTANT_SIDECHAIN);
+        const numMaskedParticipants = await pinningInterface.getMaskedSidechainParticipantsSize.call(NON_EXISTANT_SIDECHAIN);
         assert.equal(numMaskedParticipants, "0");
     });
 

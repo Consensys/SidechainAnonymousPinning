@@ -171,11 +171,7 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
         // transaction.
         sidechains[_sidechainId].unmasked.push(msg.sender);
         sidechains[_sidechainId].inUnmasked[msg.sender] = true;
-//        emit Dump(_sidechainId, 0, sidechains[_sidechainId].numUnmaskedParticipants);
         sidechains[_sidechainId].numUnmaskedParticipants++;
-//        emit Dump(_sidechainId, 0, sidechains[_sidechainId].numUnmaskedParticipants);
-//        emit Dump(_sidechainId, 0, sidechains[_sidechainId].votingAlgorithmContract);
-
     }
 
 
@@ -205,16 +201,24 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
             require(sidechains[_sidechainId].inMasked[_voteTarget] == false);
         }
         // If the action is to remove a masked participant, then they should be a participant already.
+        // Additionally, they must supply the offset into the masked array of the participant to be removed.
         if (action == VoteType.VOTE_REMOVE_MASKED_PARTICIPANT) {
             require(sidechains[_sidechainId].inMasked[_voteTarget] == true);
+            require(sidechains[_sidechainId].masked[_additionalInfo1] == _voteTarget);
         }
         // If the action is to add an unmasked participant, then they shouldn't be a participant already.
         if (action == VoteType.VOTE_ADD_UNMASKED_PARTICIPANT) {
             require(sidechains[_sidechainId].inUnmasked[address(_voteTarget)] == false);
         }
-        // If the action is to remove an unmasked participant, then they should be a participant already.
+        // If the action is to remove an unmasked participant, then they should be a participant
+        // already and they can not be the sender. That is, the sender can not vote to remove
+        // themselves.
+        // Additionally, they must supply the offset into the unmasked array of the participant to be removed.
         if (action == VoteType.VOTE_REMOVE_UNMASKED_PARTICIPANT) {
-            require(sidechains[_sidechainId].inUnmasked[address(_voteTarget)] == true);
+            address voteTargetAddr = address(_voteTarget);
+            require(sidechains[_sidechainId].inUnmasked[voteTargetAddr] == true);
+            require(voteTargetAddr != msg.sender);
+            require(sidechains[_sidechainId].unmasked[_additionalInfo1] == voteTargetAddr);
         }
 
         // Set-up the vote.
@@ -253,9 +257,9 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
         // Can only action vote after voting period has ended.
         require(sidechains[_sidechainId].votes[_voteTarget].endOfVotingBlockNumber < block.number);
 
-        emit Dump(sidechains[_sidechainId].numUnmaskedParticipants, sidechains[_sidechainId].votes[_voteTarget].numVotedFor,
-            sidechains[_sidechainId].votes[_voteTarget].numVotedAgainst
-        );
+//        emit Dump(sidechains[_sidechainId].numUnmaskedParticipants, sidechains[_sidechainId].votes[_voteTarget].numVotedFor,
+//            sidechains[_sidechainId].votes[_voteTarget].numVotedAgainst
+//        );
 
 
         VotingAlgInterface voteAlg = VotingAlgInterface(sidechains[_sidechainId].votingAlgorithmContract);
@@ -264,19 +268,34 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
                 sidechains[_sidechainId].votes[_voteTarget].numVotedFor,
                 sidechains[_sidechainId].votes[_voteTarget].numVotedAgainst);
 
-//        bool result = true;
         emit VoteResult(_sidechainId, uint16(action), _voteTarget, result);
 
+        uint256 additionalInfo11 = sidechains[_sidechainId].votes[_voteTarget].additionalInfo1;
+        emit Dump1(additionalInfo11, 0, 32);
 
         if (result) {
             // The vote has been decided in the affimative.
+            uint256 additionalInfo1 = sidechains[_sidechainId].votes[_voteTarget].additionalInfo1;
+//            emit Dump(additionalInfo1, 0, 33);
+            address participantAddr = address(_voteTarget);
             if (action == VoteType.VOTE_ADD_UNMASKED_PARTICIPANT) {
-                address newParticipant = address(_voteTarget);
-                sidechains[_sidechainId].unmasked.push(newParticipant);
-                sidechains[_sidechainId].inUnmasked[newParticipant] = true;
+                sidechains[_sidechainId].unmasked.push(participantAddr);
+                sidechains[_sidechainId].inUnmasked[participantAddr] = true;
                 sidechains[_sidechainId].numUnmaskedParticipants++;
             }
-// TODO process other types of votes.
+            else if (action == VoteType.VOTE_ADD_MASKED_PARTICIPANT) {
+                sidechains[_sidechainId].masked.push(_voteTarget);
+                sidechains[_sidechainId].inMasked[_voteTarget] = true;
+            }
+            else if (action == VoteType.VOTE_REMOVE_UNMASKED_PARTICIPANT) {
+                sidechains[_sidechainId].unmasked[additionalInfo1] = 0;
+                sidechains[_sidechainId].inUnmasked[participantAddr] = false;
+                sidechains[_sidechainId].numUnmaskedParticipants--;
+            }
+            else if (action == VoteType.VOTE_REMOVE_MASKED_PARTICIPANT) {
+                sidechains[_sidechainId].masked[additionalInfo1] = 0;
+                sidechains[_sidechainId].inMasked[_voteTarget] = false;
+            }
 
 
 
@@ -391,7 +410,7 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
     }
 
 
-    function getNumberUnmaskedSidechainParticipants(uint256 _sidechainId) external view returns(uint256) {
+    function getUnmaskedSidechainParticipantsSize(uint256 _sidechainId) external view returns(uint256) {
         return sidechains[_sidechainId].unmasked.length;
     }
 
@@ -401,7 +420,7 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
     }
 
 
-    function getNumberMaskedSidechainParticipants(uint256 _sidechainId) external view returns(uint256) {
+    function getMaskedSidechainParticipantsSize(uint256 _sidechainId) external view returns(uint256) {
         return sidechains[_sidechainId].masked.length;
     }
 

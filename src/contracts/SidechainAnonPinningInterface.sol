@@ -206,12 +206,12 @@ interface SidechainAnonPinningInterface {
     function isSidechainParticipant(uint256 _sidechainId, address _participant) external view returns(bool);
 
     /**
-     * Get the number of unmasked sidechain participants for a certain sidechain.
+     * Get the length of the masked sidechain participants array for a certain sidechain.
      *
      * @param _sidechainId The 256 bit identifier of the Sidechain.
      * @return number of unmasked sidechain participants.
      */
-    function getNumberUnmaskedSidechainParticipants(uint256 _sidechainId) external view returns(uint256);
+    function getUnmaskedSidechainParticipantsSize(uint256 _sidechainId) external view returns(uint256);
 
     /**
      * Get address of a certain unmasked sidechain participant. If the participant has been removed
@@ -224,12 +224,12 @@ interface SidechainAnonPinningInterface {
     function getUnmaskedSidechainParticipant(uint256 _sidechainId, uint256 _index) external view returns(address);
 
     /**
-     * Get the number of masked sidechain participants for a certain sidechain.
+     * Get the length of the masked sidechain participants array for a certain sidechain.
      *
      * @param _sidechainId The 256 bit identifier of the Sidechain.
-     * @return number of masked sidechain participants.
+     * @return length of the masked sidechain participants array.
      */
-    function getNumberMaskedSidechainParticipants(uint256 _sidechainId) external view returns(uint256);
+    function getMaskedSidechainParticipantsSize(uint256 _sidechainId) external view returns(uint256);
 
     /*
      * Get the salted hash of a masked sidechain participant. If the participant has been removed
@@ -250,6 +250,6 @@ interface SidechainAnonPinningInterface {
     event ParticipantVoted(uint256 _sidechainId, address _participant, uint16 _action, uint256 _voteTarget, bool _votedFor);
     event VoteResult(uint256 _sidechainId, uint16 _action, uint256 _voteTarget, bool _result);
 
-    event Dump(uint256 a, uint256 b, address c);
+    event Dump1(uint256 a, uint256 b, address c);
 
 }

@@ -70,19 +70,19 @@ contract('Add One Sidechain', function(accounts) {
         assert.equal(isPartGood, true, "account which should be part of the sidechain is");
     });
 
-    it("getNumberUnmaskedSidechainParticipants", async function() {
+    it("getUnmaskedSidechainParticipantsSize", async function() {
         let pinningInterface = await await common.getNewAnonPinning();
         await pinningInterface.addSidechain(twoSidechainId, common.A_VALID_VOTING_CONTRACT_ADDRESS, common.VOTING_PERIOD);
 
-        const numUnmasked = await pinningInterface.getNumberUnmaskedSidechainParticipants.call(twoSidechainId);
+        const numUnmasked = await pinningInterface.getUnmaskedSidechainParticipantsSize.call(twoSidechainId);
         assert.equal(numUnmasked, 1, "unexpected number of unmasked participants");
     });
 
-    it("getNumberMaskedSidechainParticipants", async function() {
+    it("getMaskedSidechainParticipantsSize", async function() {
         let pinningInterface = await await common.getNewAnonPinning();
         await pinningInterface.addSidechain(twoSidechainId, common.A_VALID_VOTING_CONTRACT_ADDRESS, common.VOTING_PERIOD);
 
-        const numMasked = await pinningInterface.getNumberMaskedSidechainParticipants.call(twoSidechainId);
+        const numMasked = await pinningInterface.getMaskedSidechainParticipantsSize.call(twoSidechainId);
         assert.equal(numMasked, 0, "unexpected number of unmasked participants");
     });
 
