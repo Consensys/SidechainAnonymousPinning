@@ -174,6 +174,11 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
         sidechains[_sidechainId].numUnmaskedParticipants++;
     }
 
+    function unmaskTemp(address msgSenderFake, uint256 _salt) external view returns (uint256) {
+        uint256 temp2 = uint256(msgSenderFake);
+        uint256 temp = uint256(keccak256(temp2, _salt));
+        return temp;
+    }
 
 
     function unmask(uint256 _sidechainId, uint256 _index, uint256 _salt) external {
@@ -267,11 +272,7 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
                 sidechains[_sidechainId].numUnmaskedParticipants,
                 sidechains[_sidechainId].votes[_voteTarget].numVotedFor,
                 sidechains[_sidechainId].votes[_voteTarget].numVotedAgainst);
-
         emit VoteResult(_sidechainId, uint16(action), _voteTarget, result);
-
-        uint256 additionalInfo11 = sidechains[_sidechainId].votes[_voteTarget].additionalInfo1;
-        emit Dump1(additionalInfo11, 0, 32);
 
         if (result) {
             // The vote has been decided in the affimative.
@@ -288,13 +289,13 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
                 sidechains[_sidechainId].inMasked[_voteTarget] = true;
             }
             else if (action == VoteType.VOTE_REMOVE_UNMASKED_PARTICIPANT) {
-                sidechains[_sidechainId].unmasked[additionalInfo1] = 0;
-                sidechains[_sidechainId].inUnmasked[participantAddr] = false;
+                delete sidechains[_sidechainId].unmasked[additionalInfo1];
+                delete sidechains[_sidechainId].inUnmasked[participantAddr];
                 sidechains[_sidechainId].numUnmaskedParticipants--;
             }
             else if (action == VoteType.VOTE_REMOVE_MASKED_PARTICIPANT) {
-                sidechains[_sidechainId].masked[additionalInfo1] = 0;
-                sidechains[_sidechainId].inMasked[_voteTarget] = false;
+                delete sidechains[_sidechainId].masked[additionalInfo1];
+                delete sidechains[_sidechainId].inMasked[_voteTarget];
             }
 
 

@@ -45,10 +45,10 @@ contract('Voting: types of voting / things to vote on:', function(accounts) {
         let isParticipant = await pinningInterface.isSidechainParticipant.call(A_SIDECHAIN_ID, newParticipant);
         assert.equal(isParticipant, true, "unexpectedly, New Participant: isSidechainParticipant == false");
 
-        let numUnmaskedParticipant = await pinningInterface.getUnmaskedSidechainParticipantsSize(A_SIDECHAIN_ID);
+        let numUnmaskedParticipant = await pinningInterface.getUnmaskedSidechainParticipantsSize.call(A_SIDECHAIN_ID);
         assert.equal(numUnmaskedParticipant, 2, "unexpectedly, number of unmasked participants != 2");
 
-        let newParticipantStored = await pinningInterface.getUnmaskedSidechainParticipant(A_SIDECHAIN_ID, "1");
+        let newParticipantStored = await pinningInterface.getUnmaskedSidechainParticipant.call(A_SIDECHAIN_ID, "1");
         assert.equal(newParticipant, newParticipantStored, "unexpectedly, the stored participant did not match the value supplied.");
     });
 
@@ -69,10 +69,10 @@ contract('Voting: types of voting / things to vote on:', function(accounts) {
         let isParticipant = await pinningInterface.isSidechainParticipant.call(A_SIDECHAIN_ID, maskedParticipant);
         assert.equal(isParticipant, false, "unexpectedly, New masked participant: isSidechainParticipant != false");
 
-        let numMaskedParticipant = await pinningInterface.getMaskedSidechainParticipantsSize(A_SIDECHAIN_ID);
+        let numMaskedParticipant = await pinningInterface.getMaskedSidechainParticipantsSize.call(A_SIDECHAIN_ID);
         assert.equal(numMaskedParticipant, 1, "unexpectedly, number of masked participants != 1");
 
-        let maskedParticipantStored = await pinningInterface.getMaskedSidechainParticipant(A_SIDECHAIN_ID, "0");
+        let maskedParticipantStored = await pinningInterface.getMaskedSidechainParticipant.call(A_SIDECHAIN_ID, "0");
         let maskedParticipantStoredHex = web3.utils.toHex(maskedParticipantStored);
         assert.equal(maskedParticipant, maskedParticipantStoredHex, "unexpectedly, the stored masked participant did not match the value supplied.");
     });
@@ -93,7 +93,7 @@ contract('Voting: types of voting / things to vote on:', function(accounts) {
         assert.equal(isParticipant, true, "unexpectedly, New Participant: isSidechainParticipant == false");
 
         const EXPECTED_OFFSET = "1";
-        let newParticipantStored = await pinningInterface.getUnmaskedSidechainParticipant(A_SIDECHAIN_ID, EXPECTED_OFFSET);
+        let newParticipantStored = await pinningInterface.getUnmaskedSidechainParticipant.call(A_SIDECHAIN_ID, EXPECTED_OFFSET);
         assert.equal(newParticipant, newParticipantStored, "unexpectedly, the stored participant did not match the value supplied.");
 
 
@@ -111,10 +111,10 @@ contract('Voting: types of voting / things to vote on:', function(accounts) {
         isParticipant = await pinningInterface.isSidechainParticipant.call(A_SIDECHAIN_ID, participantToRemove);
         assert.equal(isParticipant, false, "unexpectedly, New Participant: isSidechainParticipant != false");
 
-        let numUnmaskedParticipant = await pinningInterface.getUnmaskedSidechainParticipantsSize(A_SIDECHAIN_ID);
+        let numUnmaskedParticipant = await pinningInterface.getUnmaskedSidechainParticipantsSize.call(A_SIDECHAIN_ID);
         assert.equal(numUnmaskedParticipant, 2, "unexpectedly, unmasked participants array size != 2");
 
-        newParticipantStored = await pinningInterface.getUnmaskedSidechainParticipant(A_SIDECHAIN_ID, EXPECTED_OFFSET);
+        newParticipantStored = await pinningInterface.getUnmaskedSidechainParticipant.call(A_SIDECHAIN_ID, EXPECTED_OFFSET);
         assert.equal("0x0000000000000000000000000000000000000000", newParticipantStored, "unexpectedly, the stored participant was not zeroized.");
     });
 
@@ -134,7 +134,7 @@ contract('Voting: types of voting / things to vote on:', function(accounts) {
         assert.equal(true, result1, "incorrect result reported in event");
 
         const EXPECTED_OFFSET = "0";
-        let maskedParticipantStored = await pinningInterface.getMaskedSidechainParticipant(A_SIDECHAIN_ID, EXPECTED_OFFSET);
+        let maskedParticipantStored = await pinningInterface.getMaskedSidechainParticipant.call(A_SIDECHAIN_ID, EXPECTED_OFFSET);
         let maskedParticipantStoredHex = web3.utils.toHex(maskedParticipantStored);
         assert.equal(maskedParticipant, maskedParticipantStoredHex, "unexpectedly, the stored masked participant did not match the value supplied.");
 
@@ -145,12 +145,14 @@ contract('Voting: types of voting / things to vote on:', function(accounts) {
         const result2 = await common.checkVotingResult(pinningInterface);
         assert.equal(true, result2, "incorrect result reported in event");
 
-        maskedParticipantStored = await pinningInterface.getMaskedSidechainParticipant(A_SIDECHAIN_ID, EXPECTED_OFFSET);
+        maskedParticipantStored = await pinningInterface.getMaskedSidechainParticipant.call(A_SIDECHAIN_ID, EXPECTED_OFFSET);
         maskedParticipantStoredHex = web3.utils.toHex(maskedParticipantStored);
         assert.equal(0, maskedParticipantStoredHex, "unexpectedly, the stored masked participant was not zeroized.");
     });
 
 
-
+    it("TODO reject a PIN", async function() {
+        // write a test to reject a PIN
+    });
 
 });

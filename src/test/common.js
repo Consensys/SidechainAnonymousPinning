@@ -121,9 +121,9 @@ module.exports = {
     },
 
 
-    dumpAllDomainAddUpdateEvents: async function(eraInterface) {
-        console.log("ContractAddress                                 Event           BlkNum DomainHash                 AuthorityAddress             OrgAddress                OwnerAddress");
-        await eraInterface.DomainAddUpdate({}, {fromBlock: 0, toBlock: "latest"}).get(function(error, result){
+    dumpAllDump1Events: async function(anInterface) {
+        console.log("ContractAddress                                 Event           BlkNum DomainHash                 val1             val2                val3");
+        await anInterface.Dump1({}, {fromBlock: 0, toBlock: "latest"}).get(function(error, result){
             if (error) {
                 console.log(error);
                 throw error;
@@ -138,10 +138,9 @@ module.exports = {
                         result[i].address + " \t" +
                         result[i].event + " \t" +
                         result[i].blockNumber + " \t" +
-                        result[i].args._domainHash + " \t" +
-                        result[i].args._domainAuthority + " \t" +
-                        result[i].args._orgInfo + " \t" +
-                        result[i].args._owner + " \t"
+                        result[i].args.a + " \t" +
+                        result[i].args.b + " \t" +
+                        result[i].args.c + " \t"
                         //+
 //                        result[i].blockHash + "    " +
 //                        result[i].logIndex + " " +
@@ -154,22 +153,7 @@ module.exports = {
         });
         // If this sleep isn't here, the Ethereum Client is shutdown before the code above finished executing.
         await sleep(100);
-    },
-
-    // Pass in a contract instance and expected value to retrieve the number of emitted events and run an assertion.
-    assertDomainAddUpdateEventNum: async function(eraInterface, expectedNumEvents) {
-        eraInterface.DomainAddUpdate({}, {fromBlock: 0, toBlock: "latest"}).get(function(error, result){
-            if (error) {
-                console.log(error);
-                throw error;
-
-            }
-            assert.equal(expectedNumEvents, result.length);
-        });
-        // If this sleep isn't here, the Ethereum Client is shutdown before the code above finished executing.
-        await sleep(100);
     }
-
 
 
 

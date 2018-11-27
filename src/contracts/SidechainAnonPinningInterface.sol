@@ -251,6 +251,9 @@ interface SidechainAnonPinningInterface {
     function getMaskedSidechainParticipant(uint256 _sidechainId, uint256 _index) external view returns(uint256);
 
 
+    function unmaskTemp(address msgSenderFake, uint256 _salt) external view returns (uint256);
+
+
 
     event AddedSidechain(uint256 _sidechainId);
     event AddingSidechainMaskedParticipant(uint256 _sidechainId, bytes32 _participant);
