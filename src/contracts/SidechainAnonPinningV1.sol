@@ -174,12 +174,6 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
         sidechains[_sidechainId].numUnmaskedParticipants++;
     }
 
-    function unmaskTemp(address msgSenderFake, uint256 _salt) external view returns (uint256) {
-        uint256 temp2 = uint256(msgSenderFake);
-        uint256 temp = uint256(keccak256(temp2, _salt));
-        return temp;
-    }
-
 
     function unmask(uint256 _sidechainId, uint256 _index, uint256 _salt) external {
         uint256 maskedParticipantActual = sidechains[_sidechainId].masked[_index];
@@ -189,6 +183,7 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
         emit AddingSidechainUnmaskedParticipant(_sidechainId, msg.sender);
         sidechains[_sidechainId].unmasked.push(msg.sender);
         sidechains[_sidechainId].inUnmasked[msg.sender] = true;
+
         delete sidechains[_sidechainId].masked[_index];
         delete sidechains[_sidechainId].inMasked[maskedParticipantActual];
     }

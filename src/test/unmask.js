@@ -31,7 +31,8 @@ contract('Unmasking masked participants:', function(accounts) {
     }
 
     async function addMaskedParticipant(pinningInterface, participant, salt) {
-        let maskedParticipant  = web3.utils.keccak256(participant, salt);
+//        let maskedParticipant  = web3.utils.keccak256("0x000000000000000000000000" + participant.substring(2) + salt);
+        let maskedParticipant  = web3.utils.keccak256(participant + salt);
 
         await pinningInterface.proposeVote(A_SIDECHAIN_ID, common.VOTE_ADD_MASKED_PARTICIPANT, maskedParticipant, "0", "0");
         await common.mineBlocks(parseInt(common.VOTING_PERIOD));
@@ -48,8 +49,9 @@ contract('Unmasking masked participants:', function(accounts) {
         await addSidechain(pinningInterface);
 
         let newParticipant = accounts[1];
-        let salt = "0x123456789ABCDEF0123456789ABCDEF0";
-        let maskedParticipant  = await addMaskedParticipant(pinningInterface, newParticipant, salt);
+        let salt1 = "0000000000000000000000000000000000000000000000000000000000000001";
+        let salt = "0x" + salt1;
+        let maskedParticipant  = await addMaskedParticipant(pinningInterface, newParticipant, salt1);
 
         // Check that the masked participant exists and the unmasked participant does not exist.
         let isParticipant = await pinningInterface.isSidechainParticipant.call(A_SIDECHAIN_ID, newParticipant);
@@ -60,14 +62,7 @@ contract('Unmasking masked participants:', function(accounts) {
         let maskedParticipantStoredHex = web3.utils.toHex(maskedParticipantStored);
         assert.equal(maskedParticipant, maskedParticipantStoredHex, "unexpectedly, the stored masked participant did not match the value supplied.");
 
-
-        let val = await pinningInterface.unmaskTemp(newParticipant, salt);
-        let val1 = web3.utils.toHex(val);
-        console.log("val: " + val1);
-        console.log("mas: " + maskedParticipant);
-
-
-
+        
         await pinningInterface.unmask(A_SIDECHAIN_ID, EXPECTED_OFFSET, salt, {from: newParticipant});
 
         // Check that the masked participant doesn't exist and the unmasked participant does exist.
@@ -76,7 +71,7 @@ contract('Unmasking masked participants:', function(accounts) {
 
         maskedParticipantStored = await pinningInterface.getMaskedSidechainParticipant.call(A_SIDECHAIN_ID, EXPECTED_OFFSET);
         maskedParticipantStoredHex = web3.utils.toHex(maskedParticipantStored);
-        assert.equal("0x0000000000000000000000000000000000000000", maskedParticipantStoredHex, "unexpectedly, the stored masked participant not zeroized.");
+        assert.equal("0x0", maskedParticipantStoredHex, "unexpectedly, the stored masked participant not zeroized.");
     });
 
 });
