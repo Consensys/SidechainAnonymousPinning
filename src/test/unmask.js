@@ -62,7 +62,7 @@ contract('Unmasking masked participants:', function(accounts) {
         let maskedParticipantStoredHex = web3.utils.toHex(maskedParticipantStored);
         assert.equal(maskedParticipant, maskedParticipantStoredHex, "unexpectedly, the stored masked participant did not match the value supplied.");
 
-        
+
         await pinningInterface.unmask(A_SIDECHAIN_ID, EXPECTED_OFFSET, salt, {from: newParticipant});
 
         // Check that the masked participant doesn't exist and the unmasked participant does exist.

@@ -71,7 +71,7 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
         VOTE_REMOVE_MASKED_PARTICIPANT,     // 2
         VOTE_ADD_UNMASKED_PARTICIPANT,      // 3
         VOTE_REMOVE_UNMASKED_PARTICIPANT,   // 4
-        VOTE_CHALLENGE_PIN                  // 5
+        VOTE_CONTEST_PIN                    // 5
     }
 
     struct Votes {
@@ -125,12 +125,12 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
     bytes32 private constant EMPTY_PIN = 0x00;
 
     struct Pins {
+        // The block hash which is being pinned.
         bytes32 pin;
-        uint256 blocknumber;
-        address[] votedToRejectPin;
-        mapping(address=>bool) hasVotedToRejectPin;
+        // The block number after which the pin can not be challenged.
+        uint256 contextBlockNumber;
     }
-    mapping(bytes32=>Pins) private pinningMap;
+    mapping(uint256=>Pins) private pinningMap;
 
 
 
@@ -221,6 +221,28 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
             require(sidechains[_sidechainId].unmasked[_additionalInfo1] == voteTargetAddr);
         }
 
+        if (action == VoteType.VOTE_CONTEST_PIN) {
+            uint256 pinKey = _voteTarget;
+            uint256 previousPinKey = _additionalInfo1;
+            uint256 prfValue = _additionalInfo2;
+
+            // The current pin key must have a pin entry.
+            require(pinningMap[pinKey].pin != EMPTY_PIN);
+            // The current pin key must still be able to be contested.
+            require(pinningMap[pinKey].contextBlockNumber > block.number);
+
+
+            bytes32 prevPin = pinningMap[previousPinKey].pin;
+            // The previous pin key must have a pin entry.
+            require(prevPin != EMPTY_PIN);
+
+            // Check that the calculation is correct, proving the transaction sender knows the
+            // PRF value, and hence should be a member of the sidechain.
+            uint256 calculatedPinKey = uint256(keccak256(_sidechainId, prevPin, prfValue));
+            require(calculatedPinKey == pinKey);
+    }
+
+
         // Set-up the vote.
         sidechains[_sidechainId].votes[_voteTarget].voteType = action;
         sidechains[_sidechainId].votes[_voteTarget].endOfVotingBlockNumber = block.number + sidechains[_sidechainId].votingPeriod;
@@ -292,11 +314,11 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
                 delete sidechains[_sidechainId].masked[additionalInfo1];
                 delete sidechains[_sidechainId].inMasked[_voteTarget];
             }
-
-
-
-
-
+            else if (action == VoteType.VOTE_CONTEST_PIN) {
+                uint256 pinKey = _voteTarget;
+                delete pinningMap[pinKey].pin;
+                delete pinningMap[pinKey].contextBlockNumber;
+            }
         }
 
 
@@ -310,66 +332,28 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
         delete sidechains[_sidechainId].votes[_voteTarget];
     }
 
-    // TODO How to determine active items being voted on.
-    // TODO How to determine how vote is progressing.
-
-
 
     // Documented in interface.
-    function addPin(bytes32 _pinKey, bytes32 _pin) external {
+    function addPin(uint256 _pinKey, bytes32 _pin) external {
         // Can not add a pin if there is one already.
         require(pinningMap[_pinKey].pin == EMPTY_PIN);
 
         pinningMap[_pinKey] = Pins(
-            _pin, block.number, new address[](0)
+            _pin, block.number  + 5     //TODO The block contest time should be voted on.
         );
     }
 
 
     // Documented in interface.
-    function getPin(bytes32 _pinKey) external view returns (bytes32) {
+    function getPin(uint256 _pinKey) external view returns (bytes32) {
         return pinningMap[_pinKey].pin;
     }
 
 
-    // Documented in interface.
-    function contestPin(uint256 _sidechainId, bytes32 _previousPinKey, bytes32 _pinKey, uint256 _drbgValue) external onlySidechainParticipant(_sidechainId) {
-        // The current pin key must have a pin entry.
-        require(pinningMap[_pinKey].pin != EMPTY_PIN);
-        // The current pin key must still be able to be contested.
-        require(pinningMap[_pinKey].blocknumber > block.number);
-
-
-        bytes32 prevPin = pinningMap[_previousPinKey].pin;
-        // The previous pin key must have a pin entry.
-        require(prevPin != EMPTY_PIN);
-
-        // Check that the calculation is correct, proving the transaction sender knows the
-        // DRBG value, and hence should be a member of the sidechain.
-        bytes32 calculatedPinKey = keccak256(_sidechainId, prevPin, _drbgValue);
-        require(calculatedPinKey == _pinKey);
-
-        // Don't allow anyone to vote twice!
-        require(pinningMap[_pinKey].hasVotedToRejectPin[msg.sender] == false);
-
-        // msg sender has voted to reject the pin.
-        pinningMap[_pinKey].votedToRejectPin.push(msg.sender);
-    }
 
 
 
 
-    // Documented in interface.
-/*    function contestPinRequestVote(bytes32 _sidechainId, bytes32 _pinKey) external onlySidechainParticipant(_sidechainId) {
-        // The current pin key must have a pin entry.
-        require(pinningMap[_pinKey].pin != EMPTY_PIN);
-        // The current pin key must still be able to be contested.
-        require(pinningMap[_pinKey].blocknumber > block.number);
-
-        // TODO Pass the votes, and the number of unmasked participants who could have voted, to a voting contract
-
-    }
-*/
 
     /**
     * This function is used to indicate that an entity has voted. It has been created so that

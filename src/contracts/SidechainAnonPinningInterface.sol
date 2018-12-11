@@ -90,19 +90,34 @@ interface SidechainAnonPinningInterface {
 
     /**
      * Propose that a certain action be voted on.
+     * The message sender must be an unmasked member of the sidechain.
      *
      * Types of votes:
      *
-     * Value  Action                                 _additionalInfo1                 _additionalInfo2
-     * 1      Vote to add a masked participant.      Not used                         Not used
-     * 2      Vote to remove a masked participant    Index into array of participant  Not used
-     * 3      Vote to add an unmasked participant    Not used                         Not used
-     * 4      Vote to remove an unmasked participant Index into array of participant  Not used.
-     * 5      Challenge pin.                         TBD                              TBD
+     * Value  Action                                 _target                                 _additionalInfo1                 _additionalInfo2
+     * 1      Vote to add a masked participant.      Salted Hash of participant's address    Not used                         Not used
+     * 2      Vote to remove a masked participant    Salted Hash of participant's address    Index into array of participant  Not used
+     * 3      Vote to add an unmasked participant    Address of proposed participant         Not used                         Not used
+     * 4      Vote to remove an unmasked participant Address of participant                  Index into array of participant  Not used.
+     * 5      Contest pin.                           Pin key                                 Previous pin key                 PRF value.
+     *
+     * Note for contest a pin: The message sender must be be able to produce information to demonstrate that the
+     * contested pin is part of the sidechain by submitting the previous pin key, the current pin key,
+     * and a PRF value. Given how the keys are created, this proves that the previous and the current key are linked,
+     * which proves that the current pin key is part of the sidechain.
+     *
+     * The keys must be calculated based on the equation:
+     *
+     * Key = keccak256(Sidechain Identifier, Previous Pin, PRF Value)
+     *
+     * Where the PRF Value is the next value to be calculated, based on a shared secret seed off-chain, and the number
+     * of values which have been generated.
      *
      * @param _sidechainId The 256 bit identifier of the Sidechain.
      * @param _action The type of vote: add or remove a masked or unmasked participant, challenge a pin.
      * @param _voteTarget What is being voted on: a masked address or the unmasked address of a participant to be added or removed, or a pin to be disputed.
+     * @param _additionalInfo1 See above.
+     * @param _additionalInfo2 See above.
      */
     function proposeVote(uint256 _sidechainId, uint16 _action, uint256 _voteTarget, uint256 _additionalInfo1, uint256 _additionalInfo2) external;
 
@@ -144,7 +159,7 @@ interface SidechainAnonPinningInterface {
      * @param _pinKey The pin key calculated as per the equation above.
      * @param _pin Value to be associated with the key.
      */
-    function addPin(bytes32 _pinKey, bytes32 _pin) external;
+    function addPin(uint256 _pinKey, bytes32 _pin) external;
 
 
     /**
@@ -159,33 +174,8 @@ interface SidechainAnonPinningInterface {
      * @param _pinKey The pin key calculated as per the equation above.
      * @return The pin at the key.
      */
-    function getPin(bytes32 _pinKey) external view returns (bytes32);
+    function getPin(uint256 _pinKey) external view returns (bytes32);
 
-    /**
-     * Contest a pin. The message sender must be an unmasked member of the sidechain,
-     * and be able to produce information to demonstrate that the contest pin is part
-     * of the sidechain by submitting the previous pin key, the current pin key,
-     * and a DRBG value. Given how the keys are created, this proves that the previous
-     * and the current key are linked, which proves that the current pin key is part of
-     * the sidechain.
-     *
-     * The keys must be calculated based on the equation:
-     *
-     * Key = keccak256(Sidechain Identifier, Previous Pin, DRBG Value)
-     *
-     * Where the DRBG Value is the next value to be calculated, based on a shared secret seed
-     * off-chain, and the number of values which have been generated.
-     *
-     * @param _sidechainId The 256 bit identifier of the Sidechain.
-     * @param _previousPinKey The previous pin key calculated as per the equation above.
-     * @param _pinKey The pin key calculated as per the equation above.
-     * @param _drbgValue The next value in the DRBG sequence.
-     */
-    function contestPin(uint256 _sidechainId, bytes32 _previousPinKey, bytes32 _pinKey, uint256 _drbgValue) external;
-
-
-
-//    function contestPinRequestVote(bytes32 _sidechainId, bytes32 pinKey) external;
 
 
 
