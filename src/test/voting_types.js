@@ -23,7 +23,7 @@ const VotingAlgMajority = artifacts.require("./VotingAlgMajority.sol");
 contract('Voting: types of voting / things to vote on:', function(accounts) {
     let common = require('./common');
 
-    const A_SIDECHAIN_ID = "0x00000000000000000000000000000002";
+    const A_SIDECHAIN_ID = "0x0000000000000000000000000000000000000000000000000000000000000002";
 
 
     async function addSidechain(pinningInterface) {
@@ -160,41 +160,60 @@ contract('Voting: types of voting / things to vote on:', function(accounts) {
         let randValue2 = web3.utils.keccak256(randValue1);
         let randValue3 = web3.utils.keccak256(randValue2);
         let randValue4 = web3.utils.keccak256(randValue3);
-        console.log("RandValue1: " + randValue1);
-        console.log("RandValue2: " + randValue2);
-        console.log("RandValue3: " + randValue3);
+        //console.log("RandValue1: " + randValue1);
+        //console.log("RandValue2: " + randValue2);
+        //console.log("RandValue3: " + randValue3);
 
-        let initialPin = "00000000000000000000000000000000";
-        let blockHash0 = "000000000000000000000000001A3450";
-        let blockHash1 = "000000000000000000000000001A3451";
-        let blockHash2 = "000000000000000000000000001A3452";
-        let blockHash3 = "000000000000000000000000001A3453";
+        let initialPin = "0x0000000000000000000000000000000000000000000000000000000000000000";
+        let blockHash0 = "0x00000000000000000000000000000000000000000000000000000000001a3450";
+        let blockHash1 = "0x00000000000000000000000000000000000000000000000000000000001a3451";
+        let blockHash2 = "0x00000000000000000000000000000000000000000000000000000000001a3452";
 
 
-        // TODO these hashes are not being calculated correctly. It is probaby a string / byte array formatting issue.
+        let val = A_SIDECHAIN_ID + initialPin.substring(2) +randValue1.substring(2);
+        //console.log("val: " + val);
+        let calculatedPinKey0 = web3.utils.keccak256(val);
+        //console.log("Pin0: " + calculatedPinKey0);
 
-        console.log("zzz: " + A_SIDECHAIN_ID, initialPin, randValue1);
-        let calculatedPinKey0 = web3.utils.keccak256(A_SIDECHAIN_ID, initialPin, randValue1);
-        console.log("Pin0: " + calculatedPinKey0);
-        let calculatedPinKey1 = web3.utils.keccak256(A_SIDECHAIN_ID, blockHash0, randValue2);
-        console.log("Pin1: " + calculatedPinKey1);
-        let calculatedPinKey2 = web3.utils.keccak256(A_SIDECHAIN_ID, blockHash1, randValue3);
-        console.log("Pin2: " + calculatedPinKey2);
-        let calculatedPinKey3 = web3.utils.keccak256(A_SIDECHAIN_ID, blockHash2, initialPin, randValue4);
-        console.log("Pin3: " + calculatedPinKey3);
+        val = A_SIDECHAIN_ID + blockHash0.substring(2) +randValue2.substring(2);
+        //console.log("val: " + val);
+        let calculatedPinKey1 = web3.utils.keccak256(val);
+        //console.log("Pin1: " + calculatedPinKey1);
+
+        val = A_SIDECHAIN_ID + blockHash1.substring(2) + randValue3.substring(2);
+        //console.log("val: " + val);
+        let calculatedPinKey2 = web3.utils.keccak256(val);
+        //console.log("Pin2: " + calculatedPinKey2);
+
+        val = A_SIDECHAIN_ID + blockHash2.substring(2) + randValue4.substring(2);
+        //console.log("val: " + val);
+        let calculatedPinKey3 = web3.utils.keccak256(val);
+        //console.log("Pin3: " + calculatedPinKey3);
 
 
 
          await pinningInterface.addPin(calculatedPinKey0, blockHash0);
          await pinningInterface.addPin(calculatedPinKey1, blockHash1);
-        // await pinningInterface.addPin(calculatedPinKey2, blockHash2);
-        //
-        // const retrievedPin = await pinningInterface.getPin(calculatedPinKey2);
-        // assert.equal(blockHash2, retrievedPin);
-        //
-        // const retrievedPinNonExistent = await pinningInterface.getPin(calculatedPinKey3);
-        // assert.equal("0x00", retrievedPin);
+         await pinningInterface.addPin(calculatedPinKey2, blockHash2);
 
+         const retrievedPin = await pinningInterface.getPin(calculatedPinKey2);
+         assert.equal(blockHash2, retrievedPin);
+
+         const retrievedPinNonExistent = await pinningInterface.getPin(calculatedPinKey3);
+         assert.equal("0x0000000000000000000000000000000000000000000000000000000000000000", retrievedPinNonExistent);
+
+
+        // TODO why is this undefined?
+        console.log("VOTE_CONTEST_PIN" + common.VOTE_CONTEST_PIN);
+
+        await pinningInterface.proposeVote(A_SIDECHAIN_ID, common.VOTE_CONTEST_PIN,
+             calculatedPinKey2,  // Pin being contested
+             calculatedPinKey1,  // Previous Pin
+             randValue3);        // Psuedo random function value demonstrating that the pins are connected and belong to sidechain 2.
+        await common.mineBlocks(parseInt(common.VOTING_PERIOD));
+        await pinningInterface.actionVotes(A_SIDECHAIN_ID, calculatedPinKey2);
+        const result1 = await common.checkVotingResult(pinningInterface);
+        assert.equal(true, result1, "incorrect result reported in event");
 
 
 
