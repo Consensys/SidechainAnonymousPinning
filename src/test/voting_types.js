@@ -155,14 +155,21 @@ contract('Voting: types of voting / things to vote on:', function(accounts) {
         let pinningInterface = await common.getNewAnonPinning();
         await addSidechain(pinningInterface);
 
-        let randomSeed = "0";   // this should be random
-        let randValue1 = web3.utils.keccak256(randomSeed);
-        let randValue2 = web3.utils.keccak256(randValue1);
-        let randValue3 = web3.utils.keccak256(randValue2);
-        let randValue4 = web3.utils.keccak256(randValue3);
-        //console.log("RandValue1: " + randValue1);
-        //console.log("RandValue2: " + randValue2);
-        //console.log("RandValue3: " + randValue3);
+        let seed = 0; // This value should be randomly generated and sent to all nodes.
+        let prfResult = await common.prfInit(seed);
+        //console.log("prfResult: " + prfResult);
+        prfResult = await common.prfNextValue(prfResult[0], prfResult[1]);
+        let randValue1 = prfResult[2];
+        prfResult = await common.prfNextValue(prfResult[0], prfResult[1]);
+        let randValue2 = prfResult[2];
+        prfResult = await common.prfNextValue(prfResult[0], prfResult[1]);
+        let randValue3 = prfResult[2];
+        prfResult = await common.prfNextValue(prfResult[0], prfResult[1]);
+        let randValue4 = prfResult[2];
+        // console.log("RandValue1: " + randValue1);
+        // console.log("RandValue2: " + randValue2);
+        // console.log("RandValue3: " + randValue3);
+        // console.log("RandValue3: " + randValue4);
 
         let initialPin = "0x0000000000000000000000000000000000000000000000000000000000000000";
         let blockHash0 = "0x00000000000000000000000000000000000000000000000000000000001a3450";
@@ -202,9 +209,6 @@ contract('Voting: types of voting / things to vote on:', function(accounts) {
          const retrievedPinNonExistent = await pinningInterface.getPin(calculatedPinKey3);
          assert.equal("0x0000000000000000000000000000000000000000000000000000000000000000", retrievedPinNonExistent);
 
-
-        // TODO why is this undefined?
-        console.log("VOTE_CONTEST_PIN" + common.VOTE_CONTEST_PIN);
 
         await pinningInterface.proposeVote(A_SIDECHAIN_ID, common.VOTE_CONTEST_PIN,
              calculatedPinKey2,  // Pin being contested
