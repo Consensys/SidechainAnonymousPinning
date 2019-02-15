@@ -14,6 +14,8 @@
  * This file contains code which is common to many of the test files.
  */
 
+
+
 const SidechainAnonPinningV1 = artifacts.require("./SidechainAnonPinningV1.sol");
 
 // All tests of the public API must be tested via the interface. This ensures all functions
@@ -63,6 +65,9 @@ const mineBlocks = async function(n) {
 
 
 
+
+
+
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -97,6 +102,36 @@ module.exports = {
         let instanceAddress = instance.address;
         return await SidechainAnonPinningInterface.at(instanceAddress);
     },
+    // Initialise the PRF. If no entropy is supplied, then zero is automatically used.
+    prfInit: async function(seed) {
+        var Web3 = require('web3');
+        var web3 = new Web3();
+        //console.log("prfInit");
+        let val = seed + "1";
+        let prfInternalState = web3.utils.keccak256(val);
+        val = seed + "2";
+        let prfInternalCounter = web3.utils.keccak256(val);
+        // console.log(" Out: state: " + prfInternalState);
+        // console.log(" Out: count: " + prfInternalCounter);
+        return [prfInternalState, prfInternalCounter];
+    },
+    // Initialise the PRF. If no entropy is supplied, then zero is automatically used.
+    prfNextValue: async function(prfInternalState, prfInternalCounter) {
+        var Web3 = require('web3');
+        var web3 = new Web3();
+        //console.log("prfNextValue");
+        //console.log(" In: state: " + prfInternalState);
+        //console.log(" In: count: " + prfInternalCounter);
+        prfInternalCounter++;
+        let val = prfInternalState + prfInternalCounter;
+        //console.log(" Combined : " + val);
+        prfInternalState = web3.utils.keccak256(val);
+        let prfValue = web3.utils.keccak256(prfInternalState);
+        //console.log(" Out: state: " + prfInternalState);
+        //console.log(" Out: count: " + prfInternalCounter);
+        //console.log(" Out: value: " + prfValue);
+        return [prfInternalState, prfInternalCounter, prfValue];
+    },
 
     mineOneBlock: mineOneBlock,
 
@@ -119,6 +154,7 @@ module.exports = {
             });
         });
     },
+
 
 
     dumpAllDump1Events: async function(anInterface) {
