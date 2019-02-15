@@ -132,7 +132,9 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
     }
     mapping(uint256=>Pins) private pinningMap;
 
-    // Number of blocks after a pin is posted that it can be disputed in. Must be greater than 0.
+    // Number of blocks after a pin is posted that it can be disputed in. Must be greater than
+    // the voting period because voting on contested pins must be actioned prior to the end
+    // of the pin dispute period.
     // This value is used for all pins in the contract.
     uint32 pinDisputePeriod;
 
