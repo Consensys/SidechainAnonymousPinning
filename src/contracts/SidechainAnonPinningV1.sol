@@ -132,6 +132,10 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
     }
     mapping(uint256=>Pins) private pinningMap;
 
+    // Number of blocks after a pin is posted that it can be disputed in. Must be greater than 0.
+    // This value is used for all pins in the contract.
+    uint32 pinDisputePeriod;
+
 
 
 
@@ -146,8 +150,9 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
         _;
     }
 
-    constructor (address _votingAlg, uint32 _votingPeriod) public {
+    constructor (address _votingAlg, uint32 _votingPeriod, uint32 _pinDisputePeriod) public {
         addSidechainInternal(MANAGEMENT_PSEUDO_SIDECHAIN_ID, _votingAlg, _votingPeriod);
+        pinDisputePeriod = _pinDisputePeriod;
     }
 
 
@@ -339,7 +344,7 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
         require(pinningMap[_pinKey].pin == EMPTY_PIN);
 
         pinningMap[_pinKey] = Pins(
-            _pin, block.number  + 5     //TODO The block contest time should be voted on.
+            _pin, block.number  + pinDisputePeriod
         );
     }
 

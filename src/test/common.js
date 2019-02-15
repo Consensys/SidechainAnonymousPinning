@@ -33,6 +33,8 @@ const VOTING_PERIOD = "3";
 const VOTING_PERIOD_PLUS_ONE = "4";
 const VOTING_PERIOD_MINUS_ONE = "2";
 
+// Note that these values need to match what is set in the 1_initial_migration.js file.
+const PIN_CONTEST_PERIOD = "3";
 
 
 const VOTE_NONE = "0";
@@ -88,12 +90,13 @@ module.exports = {
     VOTING_PERIOD: VOTING_PERIOD,
     VOTING_PERIOD_PLUS_ONE: VOTING_PERIOD_PLUS_ONE,
     VOTING_PERIOD_MINUS_ONE: VOTING_PERIOD_MINUS_ONE,
+    PIN_CONTEST_PERIOD: PIN_CONTEST_PERIOD,
     A_VALID_VOTING_CONTRACT_ADDRESS: A_VALID_VOTING_CONTRACT_ADDRESS,
 
     REVERT: REVERT,
 
     getNewAnonPinning: async function() {
-        let instance = await SidechainAnonPinningV1.new((await VotingAlgMajority.deployed()).address, VOTING_PERIOD);
+        let instance = await SidechainAnonPinningV1.new((await VotingAlgMajority.deployed()).address, VOTING_PERIOD, PIN_CONTEST_PERIOD);
         let instanceAddress = instance.address;
         return await SidechainAnonPinningInterface.at(instanceAddress);
     },

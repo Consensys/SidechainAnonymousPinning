@@ -23,6 +23,6 @@ module.exports = function(deployer) {
     deployer.deploy(VotingAlgMajority).then(() => {
         return deployer.deploy(VotingAlgMajorityWhoVoted);
     }).then(() => {
-        return deployer.deploy(Pinning, VotingAlgMajority.address, 3);
+        return deployer.deploy(Pinning, VotingAlgMajority.address, 3, 3);
     });
 };
