@@ -128,7 +128,7 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
         // The block hash which is being pinned.
         bytes32 pin;
         // The block number after which the pin can not be challenged.
-        uint256 contextBlockNumber;
+        uint256 contestBlockNumber;
     }
     mapping(uint256=>Pins) private pinningMap;
 
@@ -234,7 +234,8 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
             // The current pin key must have a pin entry.
             require(pinningMap[pinKey].pin != EMPTY_PIN);
             // The current pin key must still be able to be contested.
-            require(pinningMap[pinKey].contextBlockNumber > block.number);
+            require(pinningMap[pinKey].contestBlockNumber > block.number);
+            emit Dump1(block.number, pinningMap[pinKey].contestBlockNumber, 35);
 
 
             bytes32 prevPin = pinningMap[previousPinKey].pin;
@@ -320,9 +321,16 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
                 delete sidechains[_sidechainId].inMasked[_voteTarget];
             }
             else if (action == VoteType.VOTE_CONTEST_PIN) {
+                // The current pin key must still be able to be contested.
+                // If it is beyond the contest period, ignore the affirmative result
+                // of the vote: it is too late.
                 uint256 pinKey = _voteTarget;
-                delete pinningMap[pinKey].pin;
-                delete pinningMap[pinKey].contextBlockNumber;
+                emit Dump1(block.number, pinningMap[pinKey].contestBlockNumber, 34);
+                if (pinningMap[pinKey].contestBlockNumber > block.number) {
+                    delete pinningMap[pinKey].pin;
+                    delete pinningMap[pinKey].contestBlockNumber;
+                }
+
             }
         }
 
@@ -346,6 +354,8 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
         pinningMap[_pinKey] = Pins(
             _pin, block.number  + pinDisputePeriod
         );
+        emit Dump1(block.number, pinningMap[_pinKey].contestBlockNumber, pinDisputePeriod);
+
     }
 
 
