@@ -92,11 +92,12 @@ contract('Pinning: Empty Tests', function(accounts) {
         assert.equal(numUnMaskedParticipants, "0");
     });
 
-    it("getUnmaskedSidechainParticipant for non-existent sidechain", async function() {
-        console.log("TODO not working");
-        //let pinningInterface = await await common.getDeployedAnonPinning();
-        //const unmaskedParticipant = await pinningInterface.getUnmaskedSidechainParticipant.call(NON_EXISTANT_SIDECHAIN, 0);
-        //assert.equal(unmaskedParticipant, "0");
+    it("getUnmaskedSidechainParticipant for non-existent sidechain TODO", async function() {
+        // TODO: This appears to cause a revert. This could be due to attempting to reference a map
+        //  inside a non-existant map. Need to determine if this is expected behaviour.
+        // let pinningInterface = await await common.getDeployedAnonPinning();
+        // const unmaskedParticipant = await pinningInterface.getUnmaskedSidechainParticipant.call(NON_EXISTANT_SIDECHAIN, 0);
+        // assert.equal(unmaskedParticipant, "0");
     });
 
     it("getMaskedSidechainParticipantsSize for non-existent sidechain", async function() {
@@ -105,8 +106,9 @@ contract('Pinning: Empty Tests', function(accounts) {
         assert.equal(numMaskedParticipants, "0");
     });
 
-    it("getMaskedSidechainParticipant for non-existent sidechain", async function() {
-        console.log("TODO not working");
+    it("getMaskedSidechainParticipant for non-existent sidechain TODO", async function() {
+        // TODO: This appears to cause a revert. This could be due to attempting to reference a map
+        //  inside a non-existant map. Need to determine if this is expected behaviour.
         //let pinningInterface = await await common.getDeployedAnonPinning();
         //const maskedParticipant = await pinningInterface.getMaskedSidechainParticipant.call(NON_EXISTANT_SIDECHAIN, 0);
         //assert.equal(maskedParticipant, "0");
