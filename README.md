@@ -26,30 +26,28 @@ The voting algorithm is configurable and set on a per-sidechain basis.
 
 ## Pinning
 Pinning values are put into a map. All participants of a sidechain agree on a sidechain secret.
-The sidechain secret seeds a Deterministic Random Bit Generator (DRBG). A new 256 bit value is
+The sidechain secret seeds a Pseudo Random Function (PRF). A new 256 bit value is
 generated each time an uncontested pin is posted. The key in the map is calculated using the
 equation:
 
 ```
- DRBG_Value = DRBG.nextValue
- Key = keccak256(Sidechain Identifier, Previous Pin, DRBG_Value).
+ PRF_Value = PRF.nextValue
+ Key = keccak256(Sidechain Identifier, Previous Pin, PRF_Value).
 ```
 
  * For the initial key for a sidechain, the Previous Pin is 0x00.
- * The DRBG algorithm needs to be agreed between participants. Algorithms from SP800-90 are known to
-   be good algorithms.
-
+ * The PRF algorithm needs to be agreed between participants. 
 
 Masked and unmasked participants of a sidechain observe the pinning map at the Key value waiting
 for the next pin to be posted to that entry in the map. When the pin value is posted, they can then
  determine if they wish to contest the pin. To contest the pin, they submit:
 
  * Previous Key (and hence the previous pin)
- * DRBG_Value
+ * PRF_Value
  * Sidechain Id
  
- Given they know the valid DRBG Value, they are able to contest the pin, because they must be a member of the
- sidechain. Given a good DRBG algorithm, this will not expose future or previous DRBG values, and hence will
+ Given they know the valid PRF Value, they are able to contest the pin, because they must be a member of the
+ sidechain. Given a good PRF algorithm, this will not expose future or previous PRF values, and hence will
  not reveal earlier or future pinning values, and hence won't reveal the transaction rate of the sidechain.
  
  Once a key is revealed as belonging to a specific sidechain, then Unmasked Participants can vote on
