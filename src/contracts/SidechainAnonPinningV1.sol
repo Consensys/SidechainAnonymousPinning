@@ -188,10 +188,13 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
         uint256 maskedParticipantCalculated = uint256(keccak256(msg.sender, _salt));
         // An account can only unmask itself.
         require(maskedParticipantActual == maskedParticipantCalculated);
-        emit AddingSidechainUnmaskedParticipant(_sidechainId, msg.sender);
-        sidechains[_sidechainId].unmasked.push(msg.sender);
-        sidechains[_sidechainId].inUnmasked[msg.sender] = true;
-
+        // If the unmasked participant already exists, then remove the participant
+        // from the masked list and don't add it to the unmasked list.
+        if (sidechains[_sidechainId].inUnmasked[msg.sender] == false) {
+            emit AddingSidechainUnmaskedParticipant(_sidechainId, msg.sender);
+            sidechains[_sidechainId].unmasked.push(msg.sender);
+            sidechains[_sidechainId].inUnmasked[msg.sender] = true;
+        }
         delete sidechains[_sidechainId].masked[_index];
         delete sidechains[_sidechainId].inMasked[maskedParticipantActual];
     }
