@@ -19,44 +19,7 @@ import "./VotingAlgInterface.sol";
 /**
  * Contract to manage multiple sidechains.
  *
- * For each sidechain, there are masked and unmasked participants. Unmasked participants have their
- * addresses listed as being members of a certain sidechain. Being unmasked allows the participant
- * to vote to add and remove other participants, change the voting period and algorithm, and contest
- * pins.
- *
- * Masked participants are participant which are listed against a sidechain. They are represented
- * as a salted hash of their address. The participant keeps the salt secret and keeps it off-chain.
- * If they need to unmask themselves, they present their secret salt. This is combined with their
- * sending address to create the salted hash. If this matches their masked participant value then
- * they become an unmasked participant.
- *
- * TODO discuss voting.
- *
- * Pinning values are put into a map. All participants of a sidechain agree on a sidechain secret.
- * The sidechain secret seeds a Deterministic Random Bit Generator (DRBG). A new 256 bit value is
- * generated each time an uncontested pin is posted. The key in the map is calculated using the
- * equation:
- *
- * DRBG_Value = DRBG.nextValue
- * Key = keccak256(Sidechain Identifier, Previous Pin, DRBG_Value).
- *
- * For the initial key for a sidechain, the Previous Pin is 0x00.
- *
- * Masked and unmasked participants of a sidechain observe the pinning map at the Key value waiting
- * for the next pin to be posted to that entry in the map. When the pin value is posted, they can then
- * determine if they wish to contest the pin. To contest the pin, they submit:
- *
- * Previous Key (and hence the previous pin)
- * DRBG_Value
- * Sidechain Id
- *
- * Given they know the valid DRBG Value, they are able to contest the pin, because they must be a member of the
- * sidechain. Given a good DRBG algorithm, this will not expose future or previous DRBG values, and hence will
- * not reveal earlier or future pinning values, and hence won't reveal the transaction rate of the sidechain.
- *
- * Once a key is reveals as belonging to a specific channel, then only unmasked participants can vote on
- * whether to reject or keep the pin.
- *
+ * Please see the interface for documentation on all topics except for the constructor.
  *
  */
 contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
@@ -137,7 +100,7 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
     // the voting period because voting on contested pins must be actioned prior to the end
     // of the pin dispute period.
     // This value is used for all pins in the contract.
-    uint32 pinDisputePeriod;
+    uint32 private pinDisputePeriod;
 
 
 
@@ -153,6 +116,15 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
         _;
     }
 
+    /**
+     * Set the management pseudo chain configuration and global configuration.
+     *
+     * @param _votingAlg Management pseudo chain voting algorithm.
+     * @param _votingPeriod Management pseudo chain voting period in blocks.
+     * @param _pinDisputePeriod Number of block between when a pin is posted and when it can be challenged.
+     *  Note that this must be greater than the voting period on the sidechain, otherwise participants will
+     *  not be able to vote and action votes to reject the pin within the voting period.
+     */
     constructor (address _votingAlg, uint32 _votingPeriod, uint32 _pinDisputePeriod) public {
         addSidechainInternal(MANAGEMENT_PSEUDO_SIDECHAIN_ID, _votingAlg, _votingPeriod);
         pinDisputePeriod = _pinDisputePeriod;
@@ -194,6 +166,7 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
             emit AddingSidechainUnmaskedParticipant(_sidechainId, msg.sender);
             sidechains[_sidechainId].unmasked.push(msg.sender);
             sidechains[_sidechainId].inUnmasked[msg.sender] = true;
+            sidechains[_sidechainId].numUnmaskedParticipants++;
         }
         delete sidechains[_sidechainId].masked[_index];
         delete sidechains[_sidechainId].inMasked[maskedParticipantActual];
@@ -251,7 +224,7 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
             // PRF value, and hence should be a member of the sidechain.
             uint256 calculatedPinKey = uint256(keccak256(_sidechainId, prevPin, prfValue));
             require(calculatedPinKey == pinKey);
-    }
+        }
 
 
         // Set-up the vote.
@@ -282,18 +255,12 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
     }
 
 
-    // Documented in interface.
     function actionVotes(uint256 _sidechainId, uint256 _voteTarget) external onlySidechainParticipant(_sidechainId) {
         // If no vote is underway, then there is nothing to action.
         VoteType action = sidechains[_sidechainId].votes[_voteTarget].voteType;
         require(action != VoteType.VOTE_NONE);
         // Can only action vote after voting period has ended.
         require(sidechains[_sidechainId].votes[_voteTarget].endOfVotingBlockNumber < block.number);
-
-//        emit Dump(sidechains[_sidechainId].numUnmaskedParticipants, sidechains[_sidechainId].votes[_voteTarget].numVotedFor,
-//            sidechains[_sidechainId].votes[_voteTarget].numVotedAgainst
-//        );
-
 
         VotingAlgInterface voteAlg = VotingAlgInterface(sidechains[_sidechainId].votingAlgorithmContract);
         bool result = voteAlg.assess(
@@ -340,9 +307,13 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
 
         // The vote is over. Now delete the voting arrays and indicate there is no vote underway.
         // Remove all values from the map: Maps can't be deleted in Solidity.
-//        for (uint i = 0; i < sidechains[_sidechainId].votes[_participant].addressVoted.length; i++) {
-//            delete sidechains[_sidechainId].votes[_participant].hasVoted[msg.sender];
-//        }
+        // NOTE: The code below has used values directly, rather than a local variable due to running
+        // out of local variables.
+        for (uint i = 0; i < sidechains[_sidechainId].unmasked.length; i++) {
+            if( sidechains[_sidechainId].unmasked[i] != address(0)) {
+                delete sidechains[_sidechainId].votes[_voteTarget].hasVoted[sidechains[_sidechainId].unmasked[i]];
+            }
+        }
         // This will recursively delete everything in the structure, except for the map, which was
         // deleted in the for loop above.
         delete sidechains[_sidechainId].votes[_voteTarget];
@@ -427,6 +398,8 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
         return sidechains[_sidechainId].masked[_index];
     }
 
-
+    function getPinDisputePeriod() external view returns (uint32) {
+        return pinDisputePeriod;
+    }
 
 }
