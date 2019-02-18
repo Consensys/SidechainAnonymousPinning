@@ -31,7 +31,6 @@ contract('Unmasking masked participants:', function(accounts) {
     }
 
     async function addMaskedParticipant(pinningInterface, participant, salt) {
-//        let maskedParticipant  = web3.utils.keccak256("0x000000000000000000000000" + participant.substring(2) + salt);
         let maskedParticipant  = web3.utils.keccak256(participant + salt);
 
         await pinningInterface.proposeVote(A_SIDECHAIN_ID, common.VOTE_ADD_MASKED_PARTICIPANT, maskedParticipant, "0", "0");
@@ -73,5 +72,12 @@ contract('Unmasking masked participants:', function(accounts) {
         maskedParticipantStoredHex = web3.utils.toHex(maskedParticipantStored);
         assert.equal("0x0", maskedParticipantStoredHex, "unexpectedly, the stored masked participant not zeroized.");
     });
+
+
+    // TODO: Test that unmasking when the sender address doesn't match fails.
+
+    // TODO: Test that when the offset or salt are wrong the unmasking fails.
+
+    // TODO: Test the behaviour when the masked participant is also an unmasked participant.
 
 });
