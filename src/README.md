@@ -56,8 +56,16 @@ Execute the following command in a separate window to your Truffle developer con
 truffle develop --log
 ```
 
-# Creating Tests:
-From the root directory of the Solidity project, run the following:
+# Running the gas tests and example
+Execute the following command:
 ```
-truffle create test *contractName*
+truffle develop
+```
+Then for the examples execute:
+```
+test test_examples/example.js
+```
+Then for the gas cost tests execute:
+```
+test test_gas/gas_test.js
 ```
