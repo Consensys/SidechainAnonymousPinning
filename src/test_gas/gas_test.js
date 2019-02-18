@@ -11,23 +11,33 @@
  * specific language governing permissions and limitations under the License.
  */
 /**
- * Tests which analyse gas usage of the Ethereum Registration Authority contract.
+ * Tests which analyse gas usage of the SidechainAnonPinning contract.
  *
  * The following is the gas usage shown when the tests are run:
  *
- gas: contract deploy: 961758
- add domain (auth, domainInfo, domainOwner) First Write: 87663
- add domain (auth, domainInfo, domainOwner) Subsequent Writes: 42419
- add domain (none) First Write: 25348
- add domain (none) Subsequent Writes: 25348
- add domain (auth) First Write: 45693
- add domain (auth) Subsequent Writes: 30693
- add domain (domainInfo) First Write: 45757
- add domain (domainInfo) Subsequent Writes: 30757
- add domain (domainOwner) First Write: 46909
- add domain (domainOwner) Subsequent Writes: 31665
- removeDomain (when domain in use): 20099
- removeDomain (when domain not in use): 24237
+ gas: contract deploy: 2506889
+ add sidechain: 133280
+ Propose VOTE_ADD_UNMASKED_PARTICIPANT1: 151011
+ Action  VOTE_ADD_UNMASKED_PARTICIPANT1: 64090
+ Propose VOTE_ADD_UNMASKED_PARTICIPANT2: 151011
+ Vote    VOTE_ADD_UNMASKED_PARTICIPANT2: 54432
+ Action  VOTE_ADD_UNMASKED_PARTICIPANT2: 67641
+ Num Unmasked Participants: 3
+ Propose VOTE_ADD_MASKED_PARTICIPANT: 121639
+ Action  VOTE_ADD_MASKED_PARTICIPANT: 72624
+ Num Masked Participants: 1
+ Propose VOTE_REMOVE_UNMASKED_PARTICIPANT: 136645
+ Vote    VOTE_REMOVE_UNMASKED_PARTICIPANT: 54432
+ Action  VOTE_REMOVE_UNMASKED_PARTICIPANT: 47126
+ Num Unmasked Participants: 3
+ Propose VOTE_REMOVE_MASKED_PARTICIPANT: 122238
+ Action  VOTE_REMOVE_MASKED_PARTICIPANT: 38873
+ Pin: 64997
+ Pin: 64933
+ Pin: 64997
+ Propose VOTE_CONTEST_PIN: 156463
+ Action VOTE_CONTEST_PIN: 38873
+
  */
 const VotingAlgMajority = artifacts.require("./VotingAlgMajority.sol");
 const SidechainAnonPinningV1 = artifacts.require("./SidechainAnonPinningV1.sol");
