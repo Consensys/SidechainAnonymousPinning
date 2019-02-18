@@ -15,6 +15,9 @@
  *
  * The following is the gas usage shown when the tests are run:
  *
+ *
+ Unmask: 57823
+
  gas: contract deploy: 2506889
  add sidechain: 133280
  Propose VOTE_ADD_UNMASKED_PARTICIPANT1: 151011
