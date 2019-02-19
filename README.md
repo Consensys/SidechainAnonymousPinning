@@ -1,4 +1,11 @@
-# Sidechain Management and Pinning
+# Sidechain Anonymous and Pinning
+
+##Introduction
+This repo contains code to allow the state of a sidechain to be pinned to a management chain.
+That is, the block hash of a sidechain is submitted to a contract on the management chain. 
+Doing this means that collusion between sidechain participants to revert the state of the 
+sidechain can be detected.
+
 
 ## Masked and Unmasked Participants
 For each sidechain, there are masked and unmasked participants. Unmasked Participants have their
@@ -16,13 +23,16 @@ they become an unmasked participant.
 
 Voting works in the following way:
  * An Unmasked Participant of a sidechain can submit a proposal for a vote for a certain action
-   (VOTE_REMOVE_MASKED_PARTICIPANT,VOTE_ADD_UNMASKED_PARTICIPANT, VOTE_REMOVE_UNMASKED_PARTICIPANT,
-   VOTE_CHANGE_VOTING_ALG, VOTE_CHANGE_VOTING_PERIOD, VOTE_CHANGE_PIN_VOTING_ALG,
-   VOTE_CHANGE_PIN_VOTING_PERIOD).
+   (VOTE_ADD_UNMASKED_PARTICIPANT, VOTE_REMOVE_UNMASKED_PARTICIPANT,
+   VOTE_ADD_MASKED_PARTICIPANT, VOTE_REMOVE_MASKED_PARTICIPANT,
+   VOTE_CONTEST_PIN).
  * Any other Unmasked Participant can then vote on the proposal.
  * Once the voting period has expired, any Unmasked Participant can request the vote be actioned.
  
-The voting algorithm is configurable and set on a per-sidechain basis.
+The voting algorithm and voting period is configurable and set on a per-sidechain basis. The 
+pin contest period is set on contract deployment. The pin contest period must be greater
+than the voting period to allow pins to be posted, a vote proposed, the  voted to close and
+be actioned. The act of actioning the vote for contesting a pin will remove the pin.  
 
 ## Pinning
 Pinning values are put into a map. All participants of a sidechain agree on a sidechain secret.
