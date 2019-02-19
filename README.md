@@ -1,6 +1,6 @@
 # Sidechain Anonymous and Pinning
 
-##Introduction
+## Introduction
 This repo contains code to allow the state of a sidechain to be pinned to a management chain.
 That is, the block hash of a sidechain is submitted to a contract on the management chain. 
 Doing this means that collusion between sidechain participants to revert the state of the 
