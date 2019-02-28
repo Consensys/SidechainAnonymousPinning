@@ -15,8 +15,8 @@
  *
  */
 
-var Web3 = require('web3');
-var web3 = new Web3();
+// var Web3 = require('web3');
+// var web3 = new Web3();
 
 const VotingAlgMajority = artifacts.require("./VotingAlgMajority.sol");
 
@@ -38,8 +38,8 @@ contract('Voting: types of voting / things to vote on:', function(accounts) {
         let newParticipant = accounts[1];
         await pinningInterface.proposeVote(A_SIDECHAIN_ID, common.VOTE_ADD_UNMASKED_PARTICIPANT, newParticipant, "0", "0");
         await common.mineBlocks(parseInt(common.VOTING_PERIOD));
-        await pinningInterface.actionVotes(A_SIDECHAIN_ID, newParticipant);
-        const result = await common.checkVotingResult(pinningInterface);
+        let actionResult = await pinningInterface.actionVotes(A_SIDECHAIN_ID, newParticipant);
+        const result = await common.checkVotingResult(actionResult.logs);
         assert.equal(true, result, "incorrect result reported in event");
 
         let isParticipant = await pinningInterface.isSidechainParticipant.call(A_SIDECHAIN_ID, newParticipant);
@@ -62,12 +62,13 @@ contract('Voting: types of voting / things to vote on:', function(accounts) {
 
         await pinningInterface.proposeVote(A_SIDECHAIN_ID, common.VOTE_ADD_MASKED_PARTICIPANT, maskedParticipant, "0", "0");
         await common.mineBlocks(parseInt(common.VOTING_PERIOD));
-        await pinningInterface.actionVotes(A_SIDECHAIN_ID, maskedParticipant);
-        const result = await common.checkVotingResult(pinningInterface);
+        let actionResult = await pinningInterface.actionVotes(A_SIDECHAIN_ID, maskedParticipant);
+        const result = await common.checkVotingResult(actionResult.logs);
         assert.equal(true, result, "incorrect result reported in event");
 
-        let isParticipant = await pinningInterface.isSidechainParticipant.call(A_SIDECHAIN_ID, maskedParticipant);
-        assert.equal(isParticipant, false, "unexpectedly, New masked participant: isSidechainParticipant != false");
+        // This code no longer works as the Truffle framework now picks up that maskedParticipant is the wrong size for address.
+        // let isParticipant = await pinningInterface.isSidechainParticipant.call(A_SIDECHAIN_ID, maskedParticipant);
+        // assert.equal(isParticipant, false, "unexpectedly, New masked participant: isSidechainParticipant != false");
 
         let numMaskedParticipant = await pinningInterface.getMaskedSidechainParticipantsSize.call(A_SIDECHAIN_ID);
         assert.equal(numMaskedParticipant, 1, "unexpectedly, number of masked participants != 1");
@@ -85,8 +86,8 @@ contract('Voting: types of voting / things to vote on:', function(accounts) {
         let newParticipant = accounts[1];
         await pinningInterface.proposeVote(A_SIDECHAIN_ID, common.VOTE_ADD_UNMASKED_PARTICIPANT, newParticipant, "0", "0");
         await common.mineBlocks(parseInt(common.VOTING_PERIOD));
-        await pinningInterface.actionVotes(A_SIDECHAIN_ID, newParticipant);
-        const result1 = await common.checkVotingResult(pinningInterface);
+        let actionResults = await pinningInterface.actionVotes(A_SIDECHAIN_ID, newParticipant);
+        const result1 = await common.checkVotingResult(actionResults.logs);
         assert.equal(true, result1, "incorrect result reported in event");
 
         let isParticipant = await pinningInterface.isSidechainParticipant.call(A_SIDECHAIN_ID, newParticipant);
@@ -104,8 +105,8 @@ contract('Voting: types of voting / things to vote on:', function(accounts) {
         // removed has to agree to being removed.
         await pinningInterface.vote(A_SIDECHAIN_ID, common.VOTE_REMOVE_UNMASKED_PARTICIPANT, participantToRemove, true, {from: accounts[1]});
         await common.mineBlocks(parseInt(common.VOTING_PERIOD));
-        await pinningInterface.actionVotes(A_SIDECHAIN_ID, participantToRemove);
-        const result2 = await common.checkVotingResult(pinningInterface);
+        let actionResults2 = await pinningInterface.actionVotes(A_SIDECHAIN_ID, participantToRemove);
+        const result2 = await common.checkVotingResult(actionResults2.logs);
         assert.equal(true, result2, "incorrect result reported in event");
 
         isParticipant = await pinningInterface.isSidechainParticipant.call(A_SIDECHAIN_ID, participantToRemove);
@@ -129,8 +130,8 @@ contract('Voting: types of voting / things to vote on:', function(accounts) {
         // Add the participant.
         await pinningInterface.proposeVote(A_SIDECHAIN_ID, common.VOTE_ADD_MASKED_PARTICIPANT, maskedParticipant, "0", "0");
         await common.mineBlocks(parseInt(common.VOTING_PERIOD));
-        await pinningInterface.actionVotes(A_SIDECHAIN_ID, maskedParticipant);
-        const result1 = await common.checkVotingResult(pinningInterface);
+        let actionResult1 = await pinningInterface.actionVotes(A_SIDECHAIN_ID, maskedParticipant);
+        const result1 = await common.checkVotingResult(actionResult1.logs);
         assert.equal(true, result1, "incorrect result reported in event");
 
         const EXPECTED_OFFSET = "0";
@@ -141,8 +142,8 @@ contract('Voting: types of voting / things to vote on:', function(accounts) {
         // Remove the participant.
         await pinningInterface.proposeVote(A_SIDECHAIN_ID, common.VOTE_REMOVE_MASKED_PARTICIPANT, maskedParticipant, EXPECTED_OFFSET, "0");
         await common.mineBlocks(parseInt(common.VOTING_PERIOD));
-        await pinningInterface.actionVotes(A_SIDECHAIN_ID, maskedParticipant);
-        const result2 = await common.checkVotingResult(pinningInterface);
+        let actionResult2 = await pinningInterface.actionVotes(A_SIDECHAIN_ID, maskedParticipant);
+        const result2 = await common.checkVotingResult(actionResult2.logs);
         assert.equal(true, result2, "incorrect result reported in event");
 
         maskedParticipantStored = await pinningInterface.getMaskedSidechainParticipant.call(A_SIDECHAIN_ID, EXPECTED_OFFSET);
@@ -215,8 +216,8 @@ contract('Voting: types of voting / things to vote on:', function(accounts) {
              calculatedPinKey1,  // Previous Pin
              randValue3);        // Psuedo random function value demonstrating that the pins are connected and belong to sidechain 2.
         await common.mineBlocks(parseInt(common.VOTING_PERIOD));
-        await pinningInterface.actionVotes(A_SIDECHAIN_ID, calculatedPinKey2);
-        const result1 = await common.checkVotingResult(pinningInterface);
+        let actionResult = await pinningInterface.actionVotes(A_SIDECHAIN_ID, calculatedPinKey2);
+        const result1 = await common.checkVotingResult(actionResult.logs);
         assert.equal(true, result1, "incorrect result reported in event");
 
 

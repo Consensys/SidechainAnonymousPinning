@@ -26,7 +26,6 @@ const VotingAlgMajority = artifacts.require("./VotingAlgMajority.sol");
 
 
 const MANAGEMENT_PSEUDO_SIDECHAIN_ID = "0";
-const A_VALID_VOTING_CONTRACT_ADDRESS = "0x123";//VotingAlgMajority.deployed().address;
 
 // Note that these values need to match what is set in the 1_initial_migration.js file.
 const VOTING_PERIOD = "3";
@@ -45,7 +44,7 @@ const VOTE_ADD_UNMASKED_PARTICIPANT = "3";
 const VOTE_REMOVE_UNMASKED_PARTICIPANT = "4";
 const VOTE_CONTEST_PIN = "5";
 
-const REVERT = "VM Exception while processing transaction: revert";
+const REVERT = "Returned error: VM Exception while processing transaction: revert";
 
 const mineOneBlock = async function() {
     // Mine one or more blocks.
@@ -54,6 +53,8 @@ const mineOneBlock = async function() {
         method: 'evm_mine',
         params: [],
         id: 0,
+    }, function(err, result) {
+        // dummy call back
     })
 };
 
@@ -93,7 +94,9 @@ module.exports = {
     VOTING_PERIOD_MINUS_ONE: VOTING_PERIOD_MINUS_ONE,
     PIN_CONTEST_PERIOD: PIN_CONTEST_PERIOD,
     PIN_CONTEST_PERIOD_PLUS_ONE: PIN_CONTEST_PERIOD_PLUS_ONE,
-    A_VALID_VOTING_CONTRACT_ADDRESS: A_VALID_VOTING_CONTRACT_ADDRESS,
+    getValidVotingContractAddress: async function() {
+        return (await VotingAlgMajority.deployed()).address;
+    },
 
     REVERT: REVERT,
 
@@ -109,8 +112,8 @@ module.exports = {
     },
     // Initialise the PRF. If no entropy is supplied, then zero is automatically used.
     prfInit: async function(seed) {
-        var Web3 = require('web3');
-        var web3 = new Web3();
+        // var Web3 = require('web3');
+        // var web3 = new Web3();
         //console.log("prfInit");
         let val = seed + "1";
         let prfInternalState = web3.utils.keccak256(val);
@@ -122,8 +125,8 @@ module.exports = {
     },
     // Initialise the PRF. If no entropy is supplied, then zero is automatically used.
     prfNextValue: async function(prfInternalState, prfInternalCounter) {
-        var Web3 = require('web3');
-        var web3 = new Web3();
+        // var Web3 = require('web3');
+        // var web3 = new Web3();
         //console.log("prfNextValue");
         //console.log(" In: state: " + prfInternalState);
         //console.log(" In: count: " + prfInternalCounter);
@@ -142,22 +145,10 @@ module.exports = {
 
     mineBlocks: mineBlocks,
 
-    // Pass in a contract instance and expected value to retrieve the number of emitted events and run an assertion.
-    checkVotingResult: async function(pinningInterface) {
-        return new Promise( (resolve, reject) => {
-            pinningInterface.VoteResult({}, {fromBlock: "latest", toBlock: "latest"}).get(function(error, result){
-                if (error) {
-                    console.log(error);
-                    reject(error);
-                }
-
-                if (result.length===1) {
-                    resolve(result[0].args._result);
-                } else {
-                    reject("Number of results returned: " + result.length)
-                }
-            });
-        });
+    checkVotingResult: function(logs) {
+        assert.equal(logs.length, 1);
+        assert.equal(logs[0].event, "VoteResult");
+        return logs[0].args._result;
     },
 
 

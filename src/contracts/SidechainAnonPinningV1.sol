@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-pragma solidity ^0.4.23;
+pragma solidity >=0.4.23;
 
 import "./SidechainAnonPinningInterface.sol";
 import "./VotingAlgInterface.sol";
@@ -23,8 +23,14 @@ import "./VotingAlgInterface.sol";
  *
  */
 contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
+    // The management sidechain is the sidechain with ID 0x00. It is used solely to restrict which
+    // users can create a new sidechain. Only members of this sidechain can call addSidechain().
     uint256 public constant MANAGEMENT_PSEUDO_SIDECHAIN_ID = 0;
 
+    // This PIN value is used to indicate that a PIN was contested and rejected.
+    bytes32 private constant REMOVED_PIN = "\x01";
+    // This PIN value is used to indicate that no PIN exists at the given MapKey.
+    bytes32 private constant EMPTY_PIN = 0x00;
 
     // Indications that a vote is underway.
     // VOTE_NONE indicates no vote is underway. Also matches the deleted value for integers.
@@ -85,8 +91,6 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
 
     mapping(uint256=>SidechainRecord) private sidechains;
 
-
-    bytes32 private constant EMPTY_PIN = 0x00;
 
     struct Pins {
         // The block hash which is being pinned.
@@ -157,7 +161,7 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
 
     function unmask(uint256 _sidechainId, uint256 _index, uint256 _salt) external {
         uint256 maskedParticipantActual = sidechains[_sidechainId].masked[_index];
-        uint256 maskedParticipantCalculated = uint256(keccak256(msg.sender, _salt));
+        uint256 maskedParticipantCalculated = uint256(keccak256(abi.encodePacked(msg.sender, _salt)));
         // An account can only unmask itself.
         require(maskedParticipantActual == maskedParticipantCalculated);
         // If the unmasked participant already exists, then remove the participant
@@ -222,7 +226,7 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
 
             // Check that the calculation is correct, proving the transaction sender knows the
             // PRF value, and hence should be a member of the sidechain.
-            uint256 calculatedPinKey = uint256(keccak256(_sidechainId, prevPin, prfValue));
+            uint256 calculatedPinKey = uint256(keccak256(abi.encodePacked(_sidechainId, prevPin, prfValue)));
             require(calculatedPinKey == pinKey);
         }
 
@@ -297,7 +301,7 @@ contract SidechainAnonPinningV1 is SidechainAnonPinningInterface {
                 // of the vote: it is too late.
                 uint256 pinKey = _voteTarget;
                 if (pinningMap[pinKey].contestBlockNumber > block.number) {
-                    delete pinningMap[pinKey].pin;
+                    pinningMap[pinKey].pin = REMOVED_PIN;
                     delete pinningMap[pinKey].contestBlockNumber;
                 }
 

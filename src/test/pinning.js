@@ -14,10 +14,6 @@
  * Example to how lots of the functionality.
  *
  */
-
-var Web3 = require('web3');
-var web3 = new Web3();
-
 const VotingAlgMajority = artifacts.require("./VotingAlgMajority.sol");
 
 contract('Pinning:', function(accounts) {
@@ -92,7 +88,8 @@ contract('Pinning:', function(accounts) {
     });
 
 
-    it("add a pin and then reject a pin", async function() {
+
+      it("add a pin and then reject a pin", async function() {
         let pinningInterface = await common.getNewAnonPinning();
         await addSidechain(pinningInterface);
 
@@ -156,13 +153,13 @@ contract('Pinning:', function(accounts) {
             calculatedPinKey1,  // Previous Pin
             randValue3);        // Psuedo random function value demonstrating that the pins are connected and belong to sidechain 2.
         await common.mineBlocks(parseInt(common.VOTING_PERIOD));
-        await pinningInterface.actionVotes(A_SIDECHAIN_ID, calculatedPinKey2);
-        const result1 = await common.checkVotingResult(pinningInterface);
+        let actionResult = await pinningInterface.actionVotes(A_SIDECHAIN_ID, calculatedPinKey2);
+        const result1 = await common.checkVotingResult(actionResult.logs);
         assert.equal(true, result1, "incorrect result reported in event");
 
         // The pin should have been removed.
         const retrievedPin1 = await pinningInterface.getPin(calculatedPinKey2);
-        assert.equal("0x0000000000000000000000000000000000000000000000000000000000000000", retrievedPin1);
+        assert.equal("0x0100000000000000000000000000000000000000000000000000000000000000", retrievedPin1);
     });
 
 
@@ -299,13 +296,12 @@ contract('Pinning:', function(accounts) {
         await common.mineBlocks(parseInt(common.PIN_CONTEST_PERIOD_PLUS_ONE));
 
         // The action votes will be ignored because the contest period has finished.
-        await pinningInterface.actionVotes(A_SIDECHAIN_ID, calculatedPinKey2);
-        const result1 = await common.checkVotingResult(pinningInterface);
+        let actionResult = await pinningInterface.actionVotes(A_SIDECHAIN_ID, calculatedPinKey2);
+        const result1 = await common.checkVotingResult(actionResult.logs);
         assert.equal(true, result1, "incorrect result reported in event");
 
         // The pin should still be there.
         const retrievedPin1 = await pinningInterface.getPin(calculatedPinKey2);
         assert.equal(blockHash2, retrievedPin1);
     });
-
 });
