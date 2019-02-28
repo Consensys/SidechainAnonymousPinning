@@ -14,10 +14,6 @@
  * SidechainAnonPinningV1.sol check that unmasking a masked participant works.
  *
  */
-
-var Web3 = require('web3');
-var web3 = new Web3();
-
 const VotingAlgMajority = artifacts.require("./VotingAlgMajority.sol");
 
 contract('Unmasking masked participants:', function(accounts) {
@@ -35,10 +31,9 @@ contract('Unmasking masked participants:', function(accounts) {
 
         await pinningInterface.proposeVote(A_SIDECHAIN_ID, common.VOTE_ADD_MASKED_PARTICIPANT, maskedParticipant, "0", "0");
         await common.mineBlocks(parseInt(common.VOTING_PERIOD));
-        await pinningInterface.actionVotes(A_SIDECHAIN_ID, maskedParticipant);
-        const result = await common.checkVotingResult(pinningInterface);
+        let actionResult = await pinningInterface.actionVotes(A_SIDECHAIN_ID, maskedParticipant);
+        const result = await common.checkVotingResult(actionResult.logs);
         assert.equal(true, result, "incorrect result reported in event");
-
         return maskedParticipant;
     }
 

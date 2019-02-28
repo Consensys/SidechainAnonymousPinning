@@ -63,7 +63,7 @@ contract('Pinning Gas Tests:', function(accounts) {
         result = await pinningInterface.actionVotes(A_SIDECHAIN_ID, newParticipant1);
         console.log("Action  VOTE_ADD_UNMASKED_PARTICIPANT1: " + result.receipt.gasUsed);
 
-        result = await common.checkVotingResult(pinningInterface);
+        result = await common.checkVotingResult(result.logs);
         assert.equal(true, result, "incorrect result reported in event");
         let isParticipant = await pinningInterface.isSidechainParticipant.call(A_SIDECHAIN_ID, newParticipant1);
         assert.equal(isParticipant, true, "unexpectedly, New Participant: isSidechainParticipant == false");
@@ -78,7 +78,7 @@ contract('Pinning Gas Tests:', function(accounts) {
         result = await pinningInterface.actionVotes(A_SIDECHAIN_ID, newParticipant2);
         console.log("Action  VOTE_ADD_UNMASKED_PARTICIPANT2: " + result.receipt.gasUsed);
 
-        result = await common.checkVotingResult(pinningInterface);
+        result = await common.checkVotingResult(result.logs);
         assert.equal(true, result, "incorrect result reported in event");
         isParticipant = await pinningInterface.isSidechainParticipant.call(A_SIDECHAIN_ID, newParticipant2);
         assert.equal(isParticipant, true, "unexpectedly, New Participant: isSidechainParticipant == false");
@@ -86,8 +86,6 @@ contract('Pinning Gas Tests:', function(accounts) {
         console.log("Num Unmasked Participants: " + numUnmaskedParticipants);
 
 
-        var Web3 = require('web3');
-        var web3 = new Web3();
         let newParticipant3 = accounts[3];
         let salt1 = "0000000000000000000000000000000000000000000000000000000000000001";
         let salt = "0x" + salt1;
@@ -212,16 +210,14 @@ contract('Pinning Gas Tests:', function(accounts) {
     }
 
     async function addMaskedParticipant(pinningInterface, participant, salt) {
-        var Web3 = require('web3');
-        var web3 = new Web3();
 
 //        let maskedParticipant  = web3.utils.keccak256("0x000000000000000000000000" + participant.substring(2) + salt);
         let maskedParticipant  = web3.utils.keccak256(participant + salt);
 
         await pinningInterface.proposeVote(A_SIDECHAIN_ID, common.VOTE_ADD_MASKED_PARTICIPANT, maskedParticipant, "0", "0");
         await common.mineBlocks(parseInt(common.VOTING_PERIOD));
-        await pinningInterface.actionVotes(A_SIDECHAIN_ID, maskedParticipant);
-        const result = await common.checkVotingResult(pinningInterface);
+        let actionResult = await pinningInterface.actionVotes(A_SIDECHAIN_ID, maskedParticipant);
+        const result = await common.checkVotingResult(actionResult.logs);
         assert.equal(true, result, "incorrect result reported in event");
 
         return maskedParticipant;
@@ -229,9 +225,6 @@ contract('Pinning Gas Tests:', function(accounts) {
 
 
     it("unmask", async function() {
-        var Web3 = require('web3');
-        var web3 = new Web3();
-
         let pinningInterface = await await common.getNewAnonPinning();
         await addSidechain(pinningInterface);
 

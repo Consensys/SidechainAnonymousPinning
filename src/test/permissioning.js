@@ -24,7 +24,7 @@ contract('Permissioning Check', function(accounts) {
         let pinningInterface = await await common.getNewAnonPinning();
         let didNotTriggerError = false;
         try {
-            await pinningInterface.addSidechain(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, common.A_VALID_VOTING_CONTRACT_ADDRESS, common.VOTING_PERIOD, {from: accounts[1]});
+            await pinningInterface.addSidechain(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, await common.getValidVotingContractAddress(), common.VOTING_PERIOD, {from: accounts[1]});
             didNotTriggerError = true;
         } catch(err) {
             assert.equal(err.message, common.REVERT);

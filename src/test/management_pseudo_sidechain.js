@@ -33,7 +33,7 @@ contract('Management Pseduo Sidechain', function(accounts) {
         let pinningInterface = await await common.getDeployedAnonPinning();
         let didNotTriggerError = false;
         try {
-            await pinningInterface.addSidechain(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, common.A_VALID_VOTING_CONTRACT_ADDRESS, common.VOTING_PERIOD, common.VOTE_VIEWING_PERIOD);
+            await pinningInterface.addSidechain(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, await common.getValidVotingContractAddress(), common.VOTING_PERIOD);
             didNotTriggerError = true;
         } catch(err) {
             assert.equal(err.message, common.REVERT);
@@ -46,14 +46,14 @@ contract('Management Pseduo Sidechain', function(accounts) {
 
     it("check that the account which deployed the contract can call addSidechain", async function() {
         let pinningInterface = await await common.getNewAnonPinning();
-        await pinningInterface.addSidechain(twoSidechainId, common.A_VALID_VOTING_CONTRACT_ADDRESS, common.VOTING_PERIOD, common.VOTE_VIEWING_PERIOD);
+        await pinningInterface.addSidechain(twoSidechainId, await common.getValidVotingContractAddress(), common.VOTING_PERIOD);
     });
 
     it("check that accounts other than the one which deployed the contract can not call addSidechain", async function() {
         let pinningInterface = await await common.getNewAnonPinning();
         let didNotTriggerError = false;
         try {
-            await pinningInterface.addSidechain(twoSidechainId, common.A_VALID_VOTING_CONTRACT_ADDRESS, common.VOTING_PERIOD, common.VOTE_VIEWING_PERIOD, {from: accounts[1]});
+            await pinningInterface.addSidechain(twoSidechainId, await common.getValidVotingContractAddress(), common.VOTING_PERIOD, {from: accounts[1]});
             didNotTriggerError = true;
         } catch(err) {
             assert.equal(err.message, common.REVERT);
@@ -72,8 +72,8 @@ contract('Management Pseduo Sidechain', function(accounts) {
         await common.mineBlocks(parseInt(common.VOTING_PERIOD));
         await pinningInterface.actionVotes(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, secondParticipant);
 
-//        let isParticipant = await pinningInterface.isSidechainParticipant.call(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, secondParticipant);
-//        assert.equal(isParticipant, true, "unexpectedly, Second Participant: isSidechainParticipant == false");
+       let isParticipant = await pinningInterface.isSidechainParticipant.call(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, secondParticipant);
+       assert.equal(isParticipant, true, "unexpectedly, Second Participant: isSidechainParticipant == false");
     });
 
 

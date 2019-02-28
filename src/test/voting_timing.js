@@ -24,8 +24,8 @@ contract('Voting: timing tests', function(accounts) {
 
         await pinningInterface.proposeVote(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, common.VOTE_ADD_UNMASKED_PARTICIPANT, secondParticipant, "1", "2");
         await common.mineBlocks(parseInt(common.VOTING_PERIOD));
-        await pinningInterface.actionVotes(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, secondParticipant);
-        const result = await common.checkVotingResult(pinningInterface);
+        let actionResult = await pinningInterface.actionVotes(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, secondParticipant);
+        const result = await common.checkVotingResult(actionResult.logs);
         assert.equal(true, result, "incorrect result reported in event");
 
         let isParticipant = await pinningInterface.isSidechainParticipant.call(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, secondParticipant);
@@ -38,8 +38,8 @@ contract('Voting: timing tests', function(accounts) {
 
         await pinningInterface.proposeVote(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, common.VOTE_ADD_UNMASKED_PARTICIPANT, secondParticipant, "1", "2");
         await common.mineBlocks(parseInt(common.VOTING_PERIOD_PLUS_ONE));
-        await pinningInterface.actionVotes(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, secondParticipant);
-        const result = await common.checkVotingResult(pinningInterface);
+        let actionResult = await pinningInterface.actionVotes(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, secondParticipant);
+        const result = await common.checkVotingResult(actionResult.logs);
         assert.equal(true, result, "incorrect result reported in event");
 
         let isParticipant = await pinningInterface.isSidechainParticipant.call(common.MANAGEMENT_PSEUDO_SIDECHAIN_ID, secondParticipant);
